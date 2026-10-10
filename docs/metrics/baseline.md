@@ -26,9 +26,12 @@ Per Master Prompt rule 4, fresh numbers below override §4 where they differ.
 | cli.ts | 1256 lines | **1111 lines** (direct count, wiring present) | superseded (fresh) |
 | tools/mod.ts | 1069 lines | **929 lines** (direct count) | superseded (fresh) |
 
-File sizes are direct line counts. (The coverage table prints larger
-"uncovered" ranges, e.g. cli.ts 1–1256; cause unverified — v8/source-map
-artifact suspected. Direct counts are authoritative here.)
+File sizes are direct line counts (`Get-Content | Measure-Object -Line`,
+equivalent to `wc -l`). The coverage table prints larger "uncovered" ranges
+(e.g. cli.ts 1–1256 for a 1111-line file) — reconciled as a v8/source-map
+counting artifact, not real lines; it is not used for size claims. If the two
+methods ever disagree on a trend (growing vs shrinking), trust `wc -l` and
+re-investigate the coverage mapping before citing it.
 
 ## Zero-coverage modules (confirmed from coverage table)
 
@@ -54,10 +57,11 @@ gateway 31.97%, memory 39.97%, providers 62.84%, security 54.12%, tools 69.39%.
 
 ## Ratchet locked in this task
 
-- Coverage thresholds (vitest): lines **21.5**, statements **21.5**, branches
+- Coverage thresholds (vitest): lines **21.7**, statements **21.7**, branches
   **71.0**, functions **41.7**. Set at the observed cross-matrix FLOOR, not
   the local 22.64 — first attempt at exact local values failed all 6 CI jobs
-  because V8 coverage varies per OS/Node (21.8–22.64 lines observed). Lesson:
+  because V8 coverage varies per OS/Node (21.8–22.64 lines observed). Floors
+  stay within 1 point of the local max (21.7 is 0.94 under 22.64). Lesson:
   same-machine exact ratchets are broken by design; floors only.
 - Lint + audit jobs added to CI and EXPECTED RED (that is the point: the red
   is now visible instead of absent).
