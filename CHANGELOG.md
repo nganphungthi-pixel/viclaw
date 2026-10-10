@@ -3,6 +3,18 @@
 All notable changes to Viclaw, newest first. Format follows Keep a Changelog;
 versions follow semver.
 
+## [Unreleased] — 2026-10-10 (P0-1)
+
+### Security
+
+- Child-process environment scrubbing (`src/security/env.ts`): allow-list-built
+  child env (PATH/HOME/locale/tmp + Windows startup vars + explicit
+  `envPassthrough`) replaces `{...process.env}` in BashTool, MCP spawns,
+  sandbox execs, and git helpers; known secret values redacted from tool
+  output before it returns to the model. 14 tests (unit on all platforms +
+  5 live hostile commands on Unix). Residuals documented in SECURITY.md
+  (transformed secrets, secret files, host-env richness).
+
 ## [Unreleased] — 2026-10-10 (wiring round)
 
 ### Added

@@ -35,6 +35,17 @@ use; remote use needs explicit lockdown:
    `metadata.google.internal`) are refused by `WebFetchTool`, and fetched
    content is wrapped as labelled untrusted data. Residual risk: DNS rebinding
    past the host list — use the Docker sandbox for hostile browsing.
+7. **Child-process environment (P0-1).** Spawned commands (Bash, MCP servers,
+   sandbox, git helpers) receive an allow-list-built environment, never your
+   full `process.env` — a prompt-injected `env` cannot print API keys because
+   they are not there. Tool output is additionally scanned for known secret
+   values before it returns to the model. `VICLAW_ENV_PASSTHROUGH`
+   (comma-separated names) opts extra variables in — that list is YOUR
+   responsibility; never put secrets in it. Known residual risks: transformed
+   secrets (base64, truncated, split) are not caught (needs P0-6 output
+   layers); secret FILES (`cat .env`) are a path-policy matter, not env
+   (needs P0-7 sandbox + file policy); the agent host process itself still
+   holds keys in its own env (unavoidable — it must call APIs).
 
 ## Known residual risks (not hidden)
 
