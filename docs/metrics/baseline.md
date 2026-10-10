@@ -54,8 +54,11 @@ gateway 31.97%, memory 39.97%, providers 62.84%, security 54.12%, tools 69.39%.
 
 ## Ratchet locked in this task
 
-- Coverage lines threshold: **22.64** (vitest `coverage.thresholds.lines`;
-  fail under, never lower).
+- Coverage thresholds (vitest): lines **21.5**, statements **21.5**, branches
+  **71.0**, functions **41.7**. Set at the observed cross-matrix FLOOR, not
+  the local 22.64 — first attempt at exact local values failed all 6 CI jobs
+  because V8 coverage varies per OS/Node (21.8–22.64 lines observed). Lesson:
+  same-machine exact ratchets are broken by design; floors only.
 - Lint + audit jobs added to CI and EXPECTED RED (that is the point: the red
   is now visible instead of absent).
 - `npm run check` = typecheck + lint + test + build (single entry point).
