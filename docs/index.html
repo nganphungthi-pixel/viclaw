@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viclaw — AI coding agent that runs on your machine</title>
+<meta name="description" content="Viclaw is an open-source AI coding agent. Bring any provider — or pay nothing with the $0 free stack. 6 providers, 159 tests, MIT licensed.">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <nav class="nav-inner">
+    <a class="brand" href="#top" aria-label="Viclaw home">
+      <img src="assets/logo.svg" alt="Viclaw logo" width="26" height="26">
+      <span>Viclaw</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="#how">How it works</a>
+      <a href="#providers">Providers</a>
+      <a href="#free">Free Stack</a>
+      <a href="#safety">Safety</a>
+      <a href="#install">Install</a>
+      <a class="nav-cta" href="https://github.com/nganphungthi-pixel/viclaw" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="eyebrow reveal">Viclaw 1.0 &nbsp;·&nbsp; Open source (MIT)</p>
+    <h1 class="reveal">The coding agent<br>that runs <span class="grad">on your machine.</span></h1>
+    <p class="lede reveal">Bring any AI provider — or pay nothing at all with the $0 free stack.
+      It reads your codebase, runs tools, verifies with tests, and shows its work.</p>
+    <div class="hero-cta reveal">
+      <a class="btn btn-primary" href="#install">Get started</a>
+      <a class="btn btn-ghost" href="https://github.com/nganphungthi-pixel/viclaw" target="_blank" rel="noopener">★ Star on GitHub</a>
+    </div>
+    <dl class="stats reveal">
+      <div><dt>6</dt><dd>providers</dd></div>
+      <div><dt>159</dt><dd>tests passing</dd></div>
+      <div><dt>24</dt><dd>slash commands</dd></div>
+      <div><dt>$0</dt><dd>free-stack option</dd></div>
+    </dl>
+    <div class="terminal reveal" aria-label="Demo terminal session">
+      <div class="term-bar"><span></span><span></span><span></span><span class="term-title">viclaw — chat</span></div>
+      <pre class="term-body"><code id="typed"></code><span class="caret" aria-hidden="true">▍</span></pre>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <p class="eyebrow reveal">How it works</p>
+    <h2 class="reveal">You prompt. It loops. Tests prove it.</h2>
+    <p class="sub reveal">Every task runs the same honest loop — no magic, all inspectable.</p>
+    <div class="steps">
+      <article class="step reveal">
+        <span class="step-n">1</span>
+        <h3>You describe the goal</h3>
+        <p>Type a task in the CLI, the terminal UI, or the browser chat. The agent plans the steps and picks its tools — read first, edit second.</p>
+        <code class="inline-code">fix the login redirect, add a test</code>
+      </article>
+      <article class="step reveal">
+        <span class="step-n">2</span>
+        <h3>It works with real tools</h3>
+        <p>Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Memory, Browser, MCP — declared to the model natively, with permission modes gating every mutation.</p>
+        <code class="inline-code">Grep → Read → Edit → Bash(npm test)</code>
+      </article>
+      <article class="step reveal">
+        <span class="step-n">3</span>
+        <h3>Evidence, not claims</h3>
+        <p>Structured context compaction keeps long tasks coherent. Prompt caching cuts repeat cost. 159 regression tests guard every provider's exact request shape.</p>
+        <code class="inline-code">131 → 159 tests, typecheck clean</code>
+      </article>
+    </div>
+  </section>
+
+  <!-- PROVIDERS -->
+  <section class="section section-tint" id="providers">
+    <p class="eyebrow reveal">Providers</p>
+    <h2 class="reveal">One agent. Any model.</h2>
+    <p class="sub reveal">Pick a provider, pay them directly. Viclaw charges nothing — switch anytime, with automatic fallback chains.</p>
+    <div class="tabs reveal" role="tablist" aria-label="Providers">
+      <button role="tab" aria-selected="true" data-tab="ollama">Ollama</button>
+      <button role="tab" aria-selected="false" data-tab="gemini">Gemini</button>
+      <button role="tab" aria-selected="false" data-tab="openrouter">OpenRouter</button>
+      <button role="tab" aria-selected="false" data-tab="anthropic">Anthropic</button>
+      <button role="tab" aria-selected="false" data-tab="openai">OpenAI</button>
+      <button role="tab" aria-selected="false" data-tab="bedrock">Bedrock</button>
+    </div>
+    <div class="tab-panels reveal">
+      <article data-panel="ollama">
+        <h3>Free &amp; private, on your hardware</h3>
+        <p>No API key, no internet, nothing leaves the machine. <code class="inline-code">qwen3-coder:8b</code> runs on an 8&nbsp;GB GPU; <code class="inline-code">qwen3-coder:30b</code> fits a 24&nbsp;GB card with a 256K context.</p>
+        <code class="block">ollama pull qwen3-coder:8b</code>
+      </article>
+      <article data-panel="gemini" hidden>
+        <h3>Generous free tier</h3>
+        <p>No card required. Note the trade: unpaid-tier prompts train Google's models — keep secrets and customer code off this leg.</p>
+        <code class="block">GEMINI_API_KEY=...   # aistudio.google.com</code>
+      </article>
+      <article data-panel="openrouter" hidden>
+        <h3>200+ models, one key — plus free ones</h3>
+        <p>The <code class="inline-code">openrouter/free</code> router auto-selects a free tool-calling model. Mirrors the OpenAI API, so failover just works.</p>
+        <code class="block">OPENROUTER_API_KEY=sk-or-...   # openrouter.ai/keys</code>
+      </article>
+      <article data-panel="anthropic" hidden>
+        <h3>Frontier coding quality</h3>
+        <p>Claude Sonnet-class models with native tool calling, parallel calls, and prompt caching switched on by default.</p>
+        <code class="block">ANTHROPIC_API_KEY=sk-ant-...</code>
+      </article>
+      <article data-panel="openai" hidden>
+        <h3>GPT models, function calling</h3>
+        <p>GPT-4o-class models over Chat Completions with strict function schemas and streaming accumulation.</p>
+        <code class="block">OPENAI_API_KEY=sk-...</code>
+      </article>
+      <article data-panel="bedrock" hidden>
+        <h3>Inside your AWS boundary</h3>
+        <p>Anthropic-compatible Messages API on Bedrock for teams that already live in AWS regions and IAM.</p>
+        <code class="block">AWS_ACCESS_KEY_ID=...  AWS_SECRET_ACCESS_KEY=...</code>
+      </article>
+    </div>
+  </section>
+
+  <!-- FREE STACK -->
+  <section class="section section-dark" id="free">
+    <p class="eyebrow reveal">Free Stack</p>
+    <h2 class="reveal">$0 inference. Honest limits.</h2>
+    <p class="sub reveal">One switch. Every turn tries cheapest-first; a dead or capped leg fails fast to the next one.</p>
+    <code class="block block-center reveal">VICLAW_FREE_STACK=true</code>
+    <ol class="chain reveal">
+      <li><strong>Ollama</strong><span>local · private · unlimited</span></li>
+      <li class="arrow" aria-hidden="true">→</li>
+      <li><strong>Gemini free</strong><span>no card · trains on prompts</span></li>
+      <li class="arrow" aria-hidden="true">→</li>
+      <li><strong>OpenRouter :free</strong><span>auto tool-calling router</span></li>
+    </ol>
+    <p class="fine reveal">Realistic yield: ~1–5 medium tasks/day on free quotas. Small local models trail frontier on hard multi-file refactors — supervise them with <code class="inline-code">plan</code> / <code class="inline-code">ask</code> modes. Free prompts can train vendor models: never send secrets.</p>
+  </section>
+
+  <!-- TOOLS -->
+  <section class="section" id="tools">
+    <p class="eyebrow reveal">Tools</p>
+    <h2 class="reveal">Search first. Read second.</h2>
+    <p class="sub reveal">Grep and Glob navigate the codebase so the model reads only what matters — the pattern every serious agent converged on.</p>
+    <div class="grid">
+      <article class="card reveal"><h3>Grep</h3><p>Regex content search. Defaults to file lists, with content/count modes, pagination, and ripgrep diagnostics instead of silence.</p></article>
+      <article class="card reveal"><h3>Glob</h3><p>File discovery, newest-first, capped at 100 with an explicit truncation flag.</p></article>
+      <article class="card reveal"><h3>Read · Write · Edit</h3><p>Surgical file work with pagination and separator-aware path sandboxing.</p></article>
+      <article class="card reveal"><h3>Bash</h3><p>Shell with strict allow-list gating, output caps, and Docker/process sandboxing.</p></article>
+      <article class="card reveal"><h3>WebSearch · WebFetch</h3><p>Multi-engine research. Fetched pages arrive labelled as untrusted data with SSRF guards.</p></article>
+      <article class="card reveal"><h3>Memory · Skills · MCP · Browser</h3><p>Persistent memory, reusable skills, stdio MCP servers, headless browsing.</p></article>
+    </div>
+    <div class="chips reveal" aria-label="Permission modes">
+      <span>normal</span><span>acceptEdits</span><span>ask · fails closed</span><span>plan · read-only</span><span>deny</span>
+    </div>
+  </section>
+
+  <!-- AUTONOMY -->
+  <section class="section section-tint" id="autonomy">
+    <p class="eyebrow reveal">Autonomy with guardrails</p>
+    <h2 class="reveal">Runs itself. Can't hurt itself.</h2>
+    <div class="duo">
+      <article class="card reveal">
+        <h3>Scheduler</h3>
+        <p>Cron-style unattended runs — <code class="inline-code">at</code>, <code class="inline-code">every</code>, <code class="inline-code">cron</code> — with persistent jobs, a run ledger, exponential-backoff retries, timeouts, and overdue-skip on restart.</p>
+        <code class="block">every 1h · 0 9 * * 1 · at 2026-11-01T09:00Z</code>
+      </article>
+      <article class="card reveal">
+        <h3>Mandate ledger</h3>
+        <p>Human approves one spending mandate — amount range, payee allowlist, daily cap, expiry. Every payment is authorized against it with hash-bound receipts. The model only ever receives <em>approve / deny</em>.</p>
+        <code class="block">allowlist: [exa] · max $5 · cap $8/day</code>
+      </article>
+    </div>
+  </section>
+
+  <!-- SAFETY -->
+  <section class="section" id="safety">
+    <p class="eyebrow reveal">Safety</p>
+    <h2 class="reveal">Locked down by default.</h2>
+    <div class="grid">
+      <article class="card reveal"><h3>Token-auth gateway</h3><p>Remote WebSocket access requires a token; non-localhost binds without one print a loud warning.</p></article>
+      <article class="card reveal"><h3>Sandboxed shell</h3><p>Docker or process isolation, command allow-lists, output caps that kill runaway commands.</p></article>
+      <article class="card reveal"><h3>Injection-aware web</h3><p>Fetched content is fenced as untrusted data; metadata endpoints that leak cloud credentials are refused.</p></article>
+      <article class="card reveal"><h3>Audited everything</h3><p>Budgets with hard stops, approval workflows, and an append-only activity trail.</p></article>
+    </div>
+    <p class="fine reveal">Honest limits: no SSO/SOC2 yet, <code class="inline-code">ask</code> mode fails closed instead of prompting, shell tools need Unix <code class="inline-code">sh</code>. Full model in <a href="https://github.com/nganphungthi-pixel/viclaw/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+  </section>
+
+  <!-- INSTALL -->
+  <section class="section section-tint" id="install">
+    <p class="eyebrow reveal">Install</p>
+    <h2 class="reveal">Running in two minutes.</h2>
+    <div class="duo">
+      <article class="card reveal">
+        <h3>npm</h3>
+        <code class="block">git clone https://github.com/nganphungthi-pixel/viclaw.git
+cd viclaw
+npm install
+cp .env.example .env   # add one key — or skip keys: VICLAW_FREE_STACK=true
+npm run dev</code>
+      </article>
+      <article class="card reveal">
+        <h3>Docker</h3>
+        <code class="block">docker compose up -d
+# local AI:  --profile local-ai
+# production: --profile production</code>
+        <p class="fine">Set <code class="inline-code">GATEWAY_TOKEN</code> if ports leave localhost.</p>
+      </article>
+    </div>
+    <p class="fine reveal">Node 22+ · MIT licensed · <a href="https://github.com/nganphungthi-pixel/viclaw/blob/main/CONTRIBUTING.md">contributions welcome</a></p>
+  </section>
+
+  <!-- NUMBERS -->
+  <section class="section" id="numbers">
+    <p class="eyebrow reveal">Proof, not adjectives</p>
+    <h2 class="reveal">159 tests. Zero hype.</h2>
+    <p class="sub reveal">Every provider's exact request shape is regression-tested. Marketing claims were removed from the codebase until evals exist to back them.</p>
+    <dl class="stats stats-wide reveal">
+      <div><dt>159</dt><dd>tests passing</dd></div>
+      <div><dt>6</dt><dd>providers</dd></div>
+      <div><dt>12</dt><dd>tool classes</dd></div>
+      <div><dt>MIT</dt><dd>license</dd></div>
+    </dl>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta reveal">
+    <img src="assets/logo.svg" alt="Viclaw logo" width="56" height="56">
+    <h2>Read the source. Run it local. Star it.</h2>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="https://github.com/nganphungthi-pixel/viclaw" target="_blank" rel="noopener">★ Star on GitHub</a>
+      <a class="btn btn-ghost btn-dark" href="#install">Install Viclaw</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <a class="brand" href="#top"><img src="assets/logo.svg" alt="Viclaw logo" width="22" height="22"><span>Viclaw</span></a>
+    <p>MIT licensed · Built in the open · <a href="https://github.com/nganphungthi-pixel/viclaw">GitHub</a> · <a href="https://github.com/nganphungthi-pixel/viclaw/blob/main/SECURITY.md">Security</a> · <a href="https://github.com/nganphungthi-pixel/viclaw/blob/main/CHANGELOG.md">Changelog</a></p>
+  </div>
+</footer>
+
+<script src="assets/app.js" defer></script>
+</body>
+</html>

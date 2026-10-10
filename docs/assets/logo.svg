@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Viclaw logo">
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#000000"/>
+  <circle cx="32" cy="32" r="17" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="2.6" fill="#ffffff"/>
+  <path d="M32 17 L37 32 L32 47 L27 32 Z" fill="#ffffff"/>
+  <path d="M32 17 L37 32 L27 32 Z" fill="#ff3b30"/>
+  <text x="32" y="12.5" text-anchor="middle" font-family="-apple-system, 'Segoe UI', Arial, sans-serif" font-size="7" font-weight="700" fill="#ffffff">N</text>
+</svg>
