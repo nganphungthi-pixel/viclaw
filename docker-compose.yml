@@ -1,12 +1,12 @@
 version: "3.8"
 
 services:
-  # Main clawdra agent
-  clawdra:
+  # Main viclaw agent
+  viclaw:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: clawdra
+    container_name: viclaw
     ports:
       - "3000:3000"  # WebSocket gateway
       - "4000:4000"  # Webhook channel
@@ -16,6 +16,9 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - EXA_API_KEY=${EXA_API_KEY}
+      # Required when the gateway port is reachable beyond localhost: the
+      # gateway runs agent commands, so an open port without a token is RCE.
+      - GATEWAY_TOKEN=${GATEWAY_TOKEN}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
@@ -26,54 +29,58 @@ services:
       - ENABLE_SANDBOX=true
       - SANDBOX_TYPE=docker
     volumes:
-      - clawdra-memory:/home/clawdra/.clawdra
+      - viclaw-memory:/home/viclaw/.viclaw
+      # Docker-socket mount = full host control if the agent is compromised.
+      # Keep it only when you use SANDBOX_TYPE=docker; otherwise delete this line.
       - /var/run/docker.sock:/var/run/docker.sock  # For Docker sandbox
     restart: unless-stopped
     networks:
-      - clawdra-network
+      - viclaw-network
 
   # Sandbox container (for isolated code execution)
   sandbox:
     image: alpine:latest
-    container_name: clawdra-sandbox
+    container_name: viclaw-sandbox
     command: ["sleep", "infinity"]
     restart: unless-stopped
     networks:
-      - clawdra-network
+      - viclaw-network
 
   # Optional: Ollama for local model inference
   ollama:
     image: ollama/ollama:latest
-    container_name: clawdra-ollama
+    container_name: viclaw-ollama
     ports:
-      - "11434:11434"
+      # Localhost-only: Ollama has no auth; never publish it to the network.
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama-data:/root/.ollama
     restart: unless-stopped
     networks:
-      - clawdra-network
+      - viclaw-network
     profiles:
       - local-ai
 
   # Optional: Redis for session storage
   redis:
     image: redis:7-alpine
-    container_name: clawdra-redis
+    container_name: viclaw-redis
+    # Localhost-only: this Redis has no password; never publish it to the network.
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis-data:/data
     restart: unless-stopped
     networks:
-      - clawdra-network
+      - viclaw-network
     profiles:
       - production
 
 volumes:
-  clawdra-memory:
+  viclaw-memory:
   ollama-data:
   redis-data:
 
 networks:
-  clawdra-network:
+  viclaw-network:
     driver: bridge

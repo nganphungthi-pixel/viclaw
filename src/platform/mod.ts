@@ -124,7 +124,7 @@ export function adaptCommand(command: string, targetPlatform?: Platform): string
 /**
  * Get platform-appropriate paths
  */
-export function getPlatformPath(type: "config" | "data" | "cache" | "temp", appName: string = "clawdra"): string {
+export function getPlatformPath(type: "config" | "data" | "cache" | "temp", appName: string = "viclaw"): string {
   const home = osHomedir();
   const temp = osTmpdir();
 

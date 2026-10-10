@@ -1,5 +1,5 @@
 /**
- * clawdra Gateway - WebSocket Server
+ * viclaw Gateway - WebSocket Server
  * Provides remote access to the AI agent via WebSocket
  * Also serves Web UI when enabled
  */
@@ -20,6 +20,14 @@ export interface GatewayConfig {
   sessionTimeout: number;
   serveWebUI?: boolean;
   publicDir?: string;
+  /**
+   * Shared-secret auth for WebSocket `request` messages. Set via the
+   * `GATEWAY_TOKEN` env var (or explicitly here). When set, every `request`
+   * must carry the token in `message.auth`; without it the request is refused.
+   * There is no user model — this is a single shared secret, enough to stop
+   * network-neighbor abuse of an exposed gateway.
+   */
+  token?: string;
 }
 
 const DEFAULT_GATEWAY_CONFIG: GatewayConfig = {
@@ -29,6 +37,7 @@ const DEFAULT_GATEWAY_CONFIG: GatewayConfig = {
   sessionTimeout: 3600000,
   serveWebUI: false,
   publicDir: join(process.cwd(), 'public'),
+  token: process.env.GATEWAY_TOKEN || undefined,
 };
 
 interface WSMessage {
@@ -36,6 +45,8 @@ interface WSMessage {
   id: string;
   sessionId?: string;
   payload?: unknown;
+  /** Shared secret — required on `request` when the gateway sets a token. */
+  auth?: string;
 }
 
 interface Session {
@@ -54,6 +65,23 @@ export class GatewayServer {
 
   constructor(config: Partial<GatewayConfig> = {}) {
     this.config = { ...DEFAULT_GATEWAY_CONFIG, ...config };
+    const host = this.config.host;
+    const exposed = host !== 'localhost' && host !== '127.0.0.1' && host !== '::1';
+    if (exposed && !this.config.token) {
+      // Fail loud, not silent: an agent that runs shell commands must never
+      // listen on a reachable interface without a token.
+      console.warn(
+        '[viclaw] WARNING: gateway binds a non-loopback interface ' +
+        `(${host}) with no GATEWAY_TOKEN set. Any host that can reach this ` +
+        'port can run agent commands. Set GATEWAY_TOKEN to silence this.'
+      );
+    }
+  }
+
+  /** True when the message carries a valid token, or no token is configured. */
+  isAuthorized(message: WSMessage): boolean {
+    if (!this.config.token) return true;
+    return message.auth === this.config.token;
   }
 
   async start(): Promise<void> {
@@ -72,7 +100,7 @@ export class GatewayServer {
 
         this.wss = new WebSocketServer({ noServer: true });
         this.httpServer.listen(this.config.port, this.config.host, () => {
-          console.log(`🔥 CLAWDRA Gateway | Web: http://${this.config.host}:${this.config.port} | WS: ws://${this.config.host}:${this.config.port}`);
+          console.log(`🔥 VICLAW Gateway | Web: http://${this.config.host}:${this.config.port} | WS: ws://${this.config.host}:${this.config.port}`);
           resolve();
         });
       } else {
@@ -84,7 +112,7 @@ export class GatewayServer {
         });
 
         this.wss.on('listening', () => {
-          console.log(`🔥 CLAWDRA Gateway | WS: ws://${this.config.host}:${this.config.port}`);
+          console.log(`🔥 VICLAW Gateway | WS: ws://${this.config.host}:${this.config.port}`);
           resolve();
         });
 
@@ -149,6 +177,10 @@ export class GatewayServer {
         }
 
         if (message.type === 'request') {
+          if (!this.isAuthorized(message)) {
+            this.sendError(ws, 'Unauthorized: missing or invalid auth token', message.id);
+            return;
+          }
           await this.handleRequest(ws, message, (id) => { sessionId = id; });
         }
       } catch (error) {

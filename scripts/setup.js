@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * Clawdra Post-Install Setup
+ * Viclaw Post-Install Setup
  * Shows available AI providers and their models - no pressure, just info.
- * AI billing is handled by the provider, not Clawdra.
+ * AI billing is handled by the provider, not Viclaw.
  */
 
 // ============================================================
 // AI PROVIDER MODEL CATALOG
-// All pricing is per the provider's public info. Clawdra charges nothing.
+// All pricing is per the provider's public info. Viclaw charges nothing.
 // ============================================================
 
 const PROVIDERS = {
@@ -90,7 +90,7 @@ function banner() {
   console.log(`
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║   🔥  CLAWDRA - World-Class AI Coding Agent                ║
+║   🔥  VICLAW - World-Class AI Coding Agent                ║
 ║       Setup Complete ✅                                      ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
@@ -99,8 +99,8 @@ function banner() {
 
 function showProviderList() {
   console.log('📡  Available AI Providers:\n');
-  console.log('Choose ANY provider. Clawdra works with all of them.');
-  console.log('Billing is handled by the provider, not Clawdra.\n');
+  console.log('Choose ANY provider. Viclaw works with all of them.');
+  console.log('Billing is handled by the provider, not Viclaw.\n');
 
   let idx = 1;
   for (const [key, provider] of Object.entries(PROVIDERS)) {
@@ -129,8 +129,8 @@ function showProviderDetails(providerKey) {
     console.log(`    1. Download: ${provider.website}`);
     console.log(`    2. Install it`);
     console.log(`    3. Run: ollama pull llama3.1`);
-    console.log(`    4. Run: clawdra chat`);
-    console.log(`\n  Clawdra will auto-detect Ollama. Nothing else needed.`);
+    console.log(`    4. Run: viclaw chat`);
+    console.log(`\n  Viclaw will auto-detect Ollama. Nothing else needed.`);
   } else {
     console.log(`  Get API Key: ${provider.signup}\n`);
     console.log(`  Set it in .env file: ${provider.envVar}=your-key-here\n`);
@@ -152,7 +152,7 @@ function showProviderDetails(providerKey) {
   console.log(`  └─────────────────────────────────────────────────────────────┘\n`);
 
   if (provider.models.length > 0) {
-    console.log(`  💡 Clawdra auto-detects your provider from the API key you set.`);
+    console.log(`  💡 Viclaw auto-detects your provider from the API key you set.`);
     console.log(`     You can switch models anytime with /model command.\n`);
   }
 }
@@ -165,7 +165,7 @@ function quickStartGuide() {
 
   if (hasOllama) {
     console.log('  ✅ Ollama detected! You can start right now:\n');
-    console.log('    clawdra chat\n');
+    console.log('    viclaw chat\n');
     console.log('  (Uses local AI, no API key, no internet needed)\n');
   }
 
@@ -174,10 +174,10 @@ function quickStartGuide() {
   console.log('  2. Get an API key from their website');
   console.log('  3. Copy .env.example to .env');
   console.log('  4. Add your API key to .env');
-  console.log('  5. Run: clawdra chat\n');
-  console.log('  That\'s it. Clawdra handles the rest.\n');
+  console.log('  5. Run: viclaw chat\n');
+  console.log('  That\'s it. Viclaw handles the rest.\n');
 
-  console.log('  💰 Note: You pay the AI provider directly. Clawdra is free.\n');
+  console.log('  💰 Note: You pay the AI provider directly. Viclaw is free.\n');
   console.log('  🔒 Your API key stays on your machine. Never sent anywhere.\n');
 }
 

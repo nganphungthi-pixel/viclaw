@@ -1,6 +1,6 @@
 /**
- * Voice CLI - Voice interaction for Clawdra
- * Speak to Clawdra, get voice responses
+ * Voice CLI - Voice interaction for Viclaw
+ * Speak to Viclaw, get voice responses
  * Uses Whisper/Deepgram for transcription, TTS for responses
  */
 
@@ -45,7 +45,7 @@ export class VoiceCLI {
   async startVoiceChat(): Promise<void> {
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
-║              🎤 CLAWDRA VOICE MODE                        ║
+║              🎤 VICLAW VOICE MODE                        ║
 ╚═══════════════════════════════════════════════════════════╝
 
 🎙️  Transcription: ${this.config.transcriptionProvider}
@@ -111,7 +111,7 @@ Start speaking or type your message...
   async recordAndRespond(): Promise<void> {
     console.log('\n🎙️  Recording... (press Enter to stop)\n');
 
-    const audioPath = join(tmpdir(), `clawdra-voice-${Date.now()}.webm`);
+    const audioPath = join(tmpdir(), `viclaw-voice-${Date.now()}.webm`);
 
     // Try to record using platform-specific tools
     try {
@@ -131,11 +131,11 @@ Start speaking or type your message...
 
       // Get AI response
       const response = await this.provider.chat([
-        { role: 'system', content: 'You are Clawdra, a helpful AI assistant. Be concise and conversational.' },
+        { role: 'system', content: 'You are Viclaw, a helpful AI assistant. Be concise and conversational.' },
         { role: 'user', content: transcription.text },
       ]);
 
-      console.log(`🤖 Clawdra: ${response.content}\n`);
+      console.log(`🤖 Viclaw: ${response.content}\n`);
       console.log('🔊 Speaking response...\n');
 
       await this.speak(response.content);
@@ -281,7 +281,7 @@ Start speaking or type your message...
   async respondToText(text: string): Promise<void> {
     try {
       const response = await this.provider.chat([
-        { role: 'system', content: 'You are Clawdra, a helpful AI assistant. Be concise and conversational.' },
+        { role: 'system', content: 'You are Viclaw, a helpful AI assistant. Be concise and conversational.' },
         { role: 'user', content: text },
       ]);
 

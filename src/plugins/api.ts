@@ -1,5 +1,5 @@
 /**
- * Clawdra Plugin API
+ * Viclaw Plugin API
  * 30+ registration methods, event system, plugin manifest, lifecycle management
  */
 
@@ -170,7 +170,7 @@ export interface PluginHookContext {
 // PLUGIN REGISTRY - Process-Global Singleton
 // ============================================
 
-const PLUGIN_REGISTRY_STATE = Symbol.for("clawdra.plugin.registry");
+const PLUGIN_REGISTRY_STATE = Symbol.for("viclaw.plugin.registry");
 
 interface RegistryState {
   plugins: Map<string, PluginRegistration>;

@@ -1,61 +1,63 @@
-# Aloochaat - AI Coding Agent
+# Viclaw - AI Coding Agent
 # Multi-stage build for production deployment
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies
+# Build tools for native modules
 RUN apk add --no-cache git python3 make g++
 
-# Copy package files
+# Copy package files first so dependency installation is cached separately.
+# A committed package-lock.json makes this reproducible via `npm ci`; we fall
+# back to `npm install` so the build still works before the lockfile exists.
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci
+RUN if [ -f package-lock.json ]; then \
+      npm ci --ignore-scripts --no-audit --no-fund; \
+    else \
+      npm install --ignore-scripts --no-audit --no-fund; \
+    fi
 
-# Copy source code
-COPY . .
+# Copy source and type-check + build with tsc (no bun required)
+COPY tsconfig.json tsconfig.build.json ./
+COPY src ./src
 
-# Build TypeScript
-RUN npm run build
+RUN npm run typecheck && npm run build
 
 # Production stage
 FROM node:22-alpine AS production
 
+# git is needed for agent git operations; curl for the healthcheck
+RUN apk add --no-cache git curl
+
 WORKDIR /app
 
-# Install runtime dependencies
-RUN apk add --no-cache git curl docker-cli
+COPY package.json package-lock.json* ./
 
-# Copy built files from builder
+RUN if [ -f package-lock.json ]; then \
+      npm ci --omit=dev --ignore-scripts --no-audit --no-fund; \
+    else \
+      npm install --omit=dev --ignore-scripts --no-audit --no-fund; \
+    fi
+
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
+COPY ./public ./public
 
-# Install production dependencies only
-RUN npm ci --omit=dev
+# Run as a non-root user
+RUN addgroup -g 1001 -S viclaw && \
+    adduser -S viclaw -u 1001 -G viclaw && \
+    mkdir -p /home/viclaw/.viclaw/memory && \
+    chown -R viclaw:viclaw /home/viclaw/.viclaw && \
+    chown -R viclaw:viclaw /app
 
-# Create non-root user
-RUN addgroup -g 1001 -S aloochaat && \
-    adduser -S aloochaat -u 1001 -G aloochaat
-
-# Create necessary directories
-RUN mkdir -p /home/aloochaat/.aloochaat/memory && \
-    chown -R aloochaat:aloochaat /home/aloochaat/.aloochaat && \
-    chown -R aloochaat:aloochaat /app
-
-# Set environment variables
 ENV NODE_ENV=production
-ENV HOME=/home/aloochaat
+ENV HOME=/home/viclaw
 
-# Expose ports
 EXPOSE 3000 4000
 
-# Switch to non-root user
-USER aloochaat
+USER viclaw
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Default command
 CMD ["node", "dist/cli.js"]

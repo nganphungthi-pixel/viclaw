@@ -1,25 +1,49 @@
 {
-  "name": "clawdra",
+  "name": "viclaw",
   "version": "1.0.0",
-  "description": "World-class AI coding agent",
+  "description": "AI coding agent that runs on your machine",
   "type": "module",
-  "main": "dist/cli.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "clawdra": "./dist/cli.js"
+    "viclaw": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "public",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./providers": {
+      "types": "./dist/providers/mod.d.ts",
+      "import": "./dist/providers/mod.js"
+    },
+    "./tools": {
+      "types": "./dist/tools/mod.d.ts",
+      "import": "./dist/tools/mod.js"
+    }
   },
   "scripts": {
-    "dev": "bun run src/cli.ts",
-    "build": "bun build src/cli.ts --outdir dist --target node",
+    "dev": "tsx src/cli.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build",
     "start": "node dist/cli.js",
-    "qwen": "node \"c:\\Users\\admin\\.cursor\\extensions\\qwenlm.qwen-code-vscode-ide-companion-0.14.0-win32-x64\\dist\\qwen-cli\\cli.js\"",
-    "serve": "bun run src/gateway/server.ts",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage",
-    "channels:start": "bun run src/channels/manager.ts",
-    "voice:synthesize": "bun run src/voice/cli.ts",
-    "security:scan": "bun run src/security/cli.ts",
-    "postinstall": "node scripts/setup.js",
-    "setup": "node scripts/setup-wizard.js"
+    "serve": "tsx src/gateway/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "setup": "node scripts/setup-wizard.js",
+    "channels:start": "tsx src/channels/manager.ts",
+    "voice:synthesize": "tsx src/voice/cli.ts",
+    "security:scan": "tsx src/security/cli.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.500.0",
@@ -36,17 +60,22 @@
     "react": "^18.2.0",
     "sql.js": "^1.10.2",
     "ws": "^8.16.0",
-    "zod": "^3.22.4"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^22.13.10",
     "@types/node-telegram-bot-api": "^0.64.3",
     "@types/react": "^18.2.48",
     "@types/sql.js": "^1.4.9",
     "@types/ws": "^8.5.10",
+    "eslint": "^10.12.0",
+    "@eslint/js": "^10.0.1",
+    "typescript-eslint": "^8.71.1",
+    "prettier": "^3.9.9",
+    "eslint-config-prettier": "^10.1.8",
     "tsx": "^4.21.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.1.0"
+    "vitest": "^1.6.0"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -56,8 +85,16 @@
     "agent",
     "coding",
     "claude",
-    "openclaude"
+    "cli"
   ],
-  "author": "clawdra",
-  "license": "MIT"
+  "author": "viclaw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nganphungthi-pixel/viclaw.git"
+  },
+  "homepage": "https://github.com/nganphungthi-pixel/viclaw#readme",
+  "bugs": {
+    "url": "https://github.com/nganphungthi-pixel/viclaw/issues"
+  }
 }

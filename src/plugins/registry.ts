@@ -1,5 +1,5 @@
 /**
- * Clawdra Plugins Registry
+ * Viclaw Plugins Registry
  * All plugins from Claude's plugin catalog
  * Plugins are meta-packages that bundle skills + connectors + workflows
  */

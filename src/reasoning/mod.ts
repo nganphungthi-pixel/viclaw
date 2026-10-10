@@ -49,7 +49,7 @@ export class ReasoningEngine {
     const reasoningMessages: Message[] = [
       {
         role: "system",
-        content: `You are Clawdra, an expert reasoning engine. ${prompt}\n\nFormat your response with clear numbered steps. For each step include:\n- Thought: What you're considering\n- Analysis: Your detailed reasoning\n- Conclusion: What you determine from this step`,
+        content: `You are Viclaw, an expert reasoning engine. ${prompt}\n\nFormat your response with clear numbered steps. For each step include:\n- Thought: What you're considering\n- Analysis: Your detailed reasoning\n- Conclusion: What you determine from this step`,
       },
       {
         role: "user",

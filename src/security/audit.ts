@@ -79,7 +79,7 @@ export class SecurityAuditor {
     }
 
     // Check state directory permissions (should be 700)
-    const stateDir = process.env.CLAWDRA_STATE_DIR;
+    const stateDir = process.env.VICLAW_STATE_DIR;
     if (stateDir && existsSync(stateDir)) {
       try {
         const stats = statSync(stateDir);
@@ -96,7 +96,7 @@ export class SecurityAuditor {
     }
 
     // Check config file permissions (should be 600)
-    const configPath = process.env.CLAWDRA_CONFIG;
+    const configPath = process.env.VICLAW_CONFIG;
     if (configPath && existsSync(configPath)) {
       try {
         const stats = statSync(configPath);

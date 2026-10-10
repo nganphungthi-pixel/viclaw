@@ -154,7 +154,7 @@ const MemoryConfigSchema = z.object({
 type MemoryConfig = z.infer<typeof MemoryConfigSchema>;
 
 const DEFAULT_CONFIG: Required<MemoryConfig> = {
-  storageDir: join(homedir(), ".clawdra", "memory"),
+  storageDir: join(homedir(), ".viclaw", "memory"),
   maxSessionEntries: 1000,
   maxWorkingEntries: 100,
   patternSuccessThreshold: 0.7,

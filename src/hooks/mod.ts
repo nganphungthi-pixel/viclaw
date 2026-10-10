@@ -60,7 +60,7 @@ export class HookSystem extends EventEmitter {
   constructor(profile?: "minimal" | "standard" | "strict") {
     super();
     this.profile = profile || "standard";
-    this.metricsDir = join(homedir(), ".clawdra", "metrics");
+    this.metricsDir = join(homedir(), ".viclaw", "metrics");
     this.observationsLog = join(this.metricsDir, "observations.jsonl");
 
     this.ensureMetricsDir();

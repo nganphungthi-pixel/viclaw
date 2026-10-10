@@ -73,7 +73,7 @@ export class CommandRegistry {
 
         let output = `
 ╔═══════════════════════════════════════════════════════════╗
-║              🍡 clawdra COMMANDS                       ║
+║              🍡 viclaw COMMANDS                       ║
 ╚═══════════════════════════════════════════════════════════╝
 
 📋 Available Commands:
@@ -138,7 +138,7 @@ export class CommandRegistry {
           return `❌ Invalid provider. Choose from: ${validProviders.join(', ')}`;
         }
 
-        process.env.clawdra_PROVIDER = provider;
+        process.env.viclaw_PROVIDER = provider;
 
         // Clear API keys for other providers
         if (provider === 'anthropic') {
@@ -175,7 +175,7 @@ export class CommandRegistry {
 
         return `
 ╔═══════════════════════════════════════════════════════════╗
-║              📊 clawdra STATUS                         ║
+║              📊 viclaw STATUS                         ║
 ╚═══════════════════════════════════════════════════════════╝
 
 🤖 Provider: ${providerName.toUpperCase()}
@@ -413,7 +413,7 @@ export class CommandRegistry {
     // Exit
     this.register({
       name: 'exit',
-      description: 'Exit clawdra',
+      description: 'Exit viclaw',
       usage: '/exit',
       execute: async (args, context) => {
         process.exit(0);
@@ -427,7 +427,7 @@ export class CommandRegistry {
       description: 'Show version',
       usage: '/version',
       execute: async (args, context) => {
-        return `🍡 clawdra v1.0.0\nThe Smartest AI Coding Agent - Smarter Than Claude`;
+        return `viclaw v1.0.0\nAI coding agent that runs on your machine`;
       },
     });
   }

@@ -1,5 +1,5 @@
 /**
- * Clawdra Interactive Setup
+ * Viclaw Interactive Setup
  * Provider + Model selection wizard
  */
 
@@ -104,7 +104,7 @@ function banner() {
   console.log(`
 \x1b[36m╔══════════════════════════════════════════════════════════════╗\x1b[0m
 \x1b[36m║                                                              ║\x1b[0m
-\x1b[36m║\x1b[0m  \x1b[1m🔥 CLAWDRA Setup Wizard\x1b[0m                                     \x1b[36m║\x1b[0m
+\x1b[36m║\x1b[0m  \x1b[1m🔥 VICLAW Setup Wizard\x1b[0m                                     \x1b[36m║\x1b[0m
 \x1b[36m║\x1b[0m  Choose your AI provider and model                        \x1b[36m║\x1b[0m
 \x1b[36m║                                                              ║\x1b[0m
 \x1b[36m╚══════════════════════════════════════════════════════════════╝\x1b[0m
@@ -234,7 +234,7 @@ async function setupWizard() {
   cleanedLines.push(`${provider.id.toUpperCase()}_MODEL=${model.id}`);
 
   // Add default provider
-  cleanedLines.push(`CLAWDRA_PROVIDER=${provider.id}`);
+  cleanedLines.push(`VICLAW_PROVIDER=${provider.id}`);
 
   envContent = cleanedLines.join('\n').replace(/\n{3,}/g, '\n\n');
 
@@ -254,7 +254,7 @@ async function setupWizard() {
   Context:   \x1b[90m${model.context}\x1b[0m
   Config:    \x1b[33m.env\x1b[0m
 
-  ${provider.free ? '🟢 No billing needed — runs locally!' : '💰 Billing handled by ' + provider.name + ', not Clawdra.'}
+  ${provider.free ? '🟢 No billing needed — runs locally!' : '💰 Billing handled by ' + provider.name + ', not Viclaw.'}
 
   \x1b[32mReady to go!\x1b[0m
 

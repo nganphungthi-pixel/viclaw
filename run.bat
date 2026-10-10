@@ -1,8 +1,8 @@
 @echo off
-title Clawdra - AI Coding Agent
+title Viclaw - AI Coding Agent
 echo.
 echo ========================================
-echo   Starting Clawdra Setup Check...
+echo   Starting Viclaw Setup Check...
 echo ========================================
 echo.
 
@@ -49,7 +49,7 @@ echo [OK] TypeScript compiles clean
 
 echo.
 echo ========================================
-echo   Starting Clawdra...
+echo   Starting Viclaw...
 echo ========================================
 echo.
 

@@ -131,7 +131,7 @@ export async function createProcessSandbox(config: Record<string, unknown>): Pro
 
 export async function createDockerSandbox(config: Record<string, unknown>): Promise<SandboxBackendHandle> {
   const image = (config.image as string) || "node:22-alpine";
-  const containerId = (config.containerId as string) || `clawdra-sandbox-${Date.now()}`;
+  const containerId = (config.containerId as string) || `viclaw-sandbox-${Date.now()}`;
   const workdir = (config.workdir as string) || "/workspace";
   let isRunning = false;
 

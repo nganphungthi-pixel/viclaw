@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * clawdra - World-Class AI Coding Agent
+  * viclaw - AI coding agent that runs on your machine
  * Built from the ground up
  */
 
@@ -64,10 +64,10 @@ const ConfigSchema = z.object({
 type Config = z.infer<typeof ConfigSchema>;
 
 // ============================================================
-// CLAWDRA CLASS
+// VICLAW CLASS
 // ============================================================
 
-class Clawdra {
+class Viclaw {
   private config: Config;
   private agent: AgentLoop;
   private skillManager: SkillManager;
@@ -83,8 +83,8 @@ class Clawdra {
 
     // Platform paths
     const platform = detectPlatform();
-    const stateDir = getPlatformPath('data', 'clawdra');
-    const configDir = getPlatformPath('config', 'clawdra');
+    const stateDir = getPlatformPath('data', 'viclaw');
+    const configDir = getPlatformPath('config', 'viclaw');
 
     // Config manager with hot-reload
     this.configManager = new ConfigManager(
@@ -468,7 +468,7 @@ class Clawdra {
         const providerName = detectProvider();
         const runState = this.runState.getState();
 
-        let output = `## Clawdra Configuration\n\n`;
+        let output = `## Viclaw Configuration\n\n`;
         output += `### System\n\n`;
         output += `- **Platform:** ${platform.platform} (${platform.arch})\n`;
         output += `- **Shell:** ${platform.shell}\n`;
@@ -505,11 +505,11 @@ class Clawdra {
     console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
-║    🔥  C L A W D R A                                          ║
-║        World-Class AI Coding Agent                            ║
-║        Built from the Ground Up                               ║
+║    🧭  V I C L A W                                            ║
+║        AI coding agent on your machine                        ║
+║        Local-first. Multi-provider. Yours.                    ║
 ║                                                               ║
-║    "Smarter. Faster. Connected to everything."               ║
+║    "Free stack ready. Capped mandates. Audited runs."        ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
     `);
@@ -699,8 +699,8 @@ class Clawdra {
 const program = new Command();
 
 program
-  .name('clawdra')
-  .description('🔥 World-Class AI Coding Agent - Smarter Than Claude')
+  .name('viclaw')
+  .description('AI coding agent that runs on your machine')
   .version('1.0.0');
 
 // Chat command (default)
@@ -718,7 +718,7 @@ program
   .action(async (opts) => {
     const config = ConfigSchema.parse({
       model: opts.model || process.env.ANTHROPIC_MODEL || process.env.OPENAI_MODEL || 'claude-sonnet-4-20250514',
-      provider: (opts.provider || process.env.CLAWDRA_PROVIDER || detectProvider()) as any,
+      provider: (opts.provider || process.env.VICLAW_PROVIDER || detectProvider()) as any,
       maxIterations: parseInt(opts.iterations) || 50,
       thinkingLevel: (opts.thinking || process.env.THINKING_LEVEL || 'medium').toLowerCase(),
       enableLearning: opts.learning !== false,
@@ -729,7 +729,7 @@ program
     if (opts.tui) {
       // TUI mode with streaming
       const { renderTUI } = await import('./tui/app.js');
-      const agent = new Clawdra(config);
+      const agent = new Viclaw(config);
       renderTUI({
         provider: config.provider,
         model: config.model,
@@ -768,7 +768,7 @@ program
       await voiceCLI.startVoiceChat();
     } else {
       // Standard REPL mode
-      const agent = new Clawdra(config);
+      const agent = new Viclaw(config);
       await agent.start();
     }
   });
@@ -790,7 +790,7 @@ program
       sandboxType: 'process',
     });
 
-    const agent = new Clawdra(config);
+    const agent = new Viclaw(config);
 
     if (opts.reason) {
       console.log(`🧠 Reasoning about: ${query}\n`);
@@ -857,7 +857,7 @@ program
   .option('--host <host>', 'Host address', 'localhost')
   .option('--no-ui', 'Disable Web UI (API only)', false)
   .action(async (opts) => {
-    console.log('🌐 Starting Clawdra gateway server...\n');
+    console.log('🌐 Starting Viclaw gateway server...\n');
 
     const { GatewayServer } = await import('./gateway/server.js');
     const { autoStartMCPServers } = await import('./mcp/autostart.js');
@@ -902,12 +902,12 @@ program
   .action(async (opts) => {
     const pkgPath = join(process.cwd(), 'package.json');
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-    console.log(`🔥 Clawdra v${pkg.version}`);
+    console.log(`🔥 Viclaw v${pkg.version}`);
 
     if (opts.check) {
       console.log('\n🔄 Checking for updates...');
       try {
-        const response = await fetch('https://registry.npmjs.org/clawdra/latest');
+        const response = await fetch('https://registry.npmjs.org/viclaw/latest');
         if (response.ok) {
           const data = await response.json() as { version: string };
           const latest = data.version;
@@ -915,7 +915,7 @@ program
 
           if (latest !== current) {
             console.log(`📦 Update available: ${current} → ${latest}`);
-            console.log(`   Run: npm install -g clawdra@${latest}`);
+            console.log(`   Run: npm install -g viclaw@${latest}`);
           } else {
             console.log('✅ Already on latest version');
           }
@@ -943,10 +943,10 @@ program
     const { ConfigManager } = await import('./config/mod.js');
     const { getPlatformPath } = await import('./platform/mod.js');
 
-    const configDir = getPlatformPath('config', 'clawdra');
+    const configDir = getPlatformPath('config', 'viclaw');
     const configManager = new ConfigManager(
       join(configDir, 'config.json'),
-      getPlatformPath('data', 'clawdra')
+      getPlatformPath('data', 'viclaw')
     );
 
     console.log('👀 Watching for config changes...\n');

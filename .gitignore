@@ -1,5 +1,5 @@
 # ============================================
-# CLAWDRA .gitignore
+# VICLAW .gitignore
 # Files that should NOT be on GitHub
 # ============================================
 
@@ -45,7 +45,7 @@ temp/
 coverage/
 
 # SQLite memory
-~/.clawdra/
+~/.viclaw/
 
 # Internal development files
 .omc/

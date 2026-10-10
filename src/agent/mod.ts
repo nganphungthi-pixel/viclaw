@@ -1,4 +1,15 @@
-import { createProvider, createFallbackProvider, Message, Chunk, Response, Provider, getDefaultConfig } from "../providers/mod.js";
+import {
+  createProvider,
+  createFallbackProvider,
+  createFreeStackProvider,
+  toToolDefinitions,
+  Message,
+  Chunk,
+  Response,
+  Provider,
+  getDefaultConfig,
+  type ToolRequestOptions,
+} from "../providers/mod.js";
 import { MemorySystem, MemoryType } from "../memory/mod.js";
 import { SQLiteMemory } from "../memory/sqlite.js";
 import { ToolExecutor, Tool, ToolResult } from "../tools/mod.js";
@@ -29,6 +40,13 @@ export interface AgentConfig {
   enableMultiModelRouting: boolean;
   enableSandbox: boolean;
   sandboxType: "docker" | "process" | "none";
+  /**
+   * Anthropic prompt caching (`cache_control` on system + tools). Default on:
+   * the agent loop re-sends the same large prefixes every turn, and caching
+   * cuts that cost/latency. Opt-out per call is still possible — providers only
+   * cache when `ToolRequestOptions.enablePromptCache` is set.
+   */
+  enablePromptCache: boolean;
 }
 
 export interface AgentContext {
@@ -85,14 +103,15 @@ const DEFAULT_AGENT_CONFIG: AgentConfig = {
   enableMultiModelRouting: false,
   enableSandbox: false,
   sandboxType: "process",
+  enablePromptCache: true,
 };
 
-const SYSTEM_PROMPT = `You are Clawdra, a world-class AI coding agent with expertise across frameworks, services, and platforms.
+const SYSTEM_PROMPT = `You are Viclaw, an AI coding agent that runs on your machine.
 
 ## Core Capabilities
 - **Code Expert**: Next.js, React, Tailwind, shadcn/ui, WordPress, TypeScript, Python, Go, Rust
 - **Service Integration**: Supabase, Firebase, Vercel, GitHub, Resend, Hostinger, PostgreSQL
-- **Multi-Engine Research**: Search across Google, Brave, Bing, Yahoo, DuckDuckGo, Tavily, GitHub
+- **Web Research**: Exa-backed search by default; Brave/Serper/Bing/Tavily/GitHub available with API keys, DuckDuckGo as keyless fallback
 - **Deep Reasoning**: Chain-of-thought analysis for complex problems
 - **Multi-Agent Orchestration**: Spawn sub-agents for parallel execution
 - **MCP Connected**: External service integrations via Model Context Protocol
@@ -103,6 +122,8 @@ const SYSTEM_PROMPT = `You are Clawdra, a world-class AI coding agent with exper
 - Write: Create or overwrite files
 - Edit: Edit files by replacing specific text
 - Bash: Execute shell commands
+- Glob: Find files by glob pattern
+- Grep: Search file contents with a regular expression
 - WebSearch: Multi-engine web search
 - WebFetch: Fetch content from URLs
 - Memory: Persistent key-value storage
@@ -110,6 +131,10 @@ const SYSTEM_PROMPT = `You are Clawdra, a world-class AI coding agent with exper
 - SubAgent: Spawn sub-agents for parallel task execution
 - Research: Deep research across multiple search engines
 - Reason: Deep reasoning with chain-of-thought analysis
+
+Tools are invoked through the model's native tool-calling interface. Choose the
+narrowest tool that fits: use Glob to locate files, Grep to find symbols or
+strings, and only Read a file once you know which part you need.
 
 ## How to Work
 1. Analyze the task and activate relevant expertise patterns
@@ -143,6 +168,7 @@ const AgentConfigSchema = z.object({
   enableMultiModelRouting: z.boolean().optional(),
   enableSandbox: z.boolean().optional(),
   sandboxType: z.enum(["docker", "process", "none"]).optional(),
+  enablePromptCache: z.boolean().optional(),
 });
 
 export class AgentLoop {
@@ -168,7 +194,12 @@ export class AgentLoop {
   ) {
     const parsedConfig = AgentConfigSchema.parse(config);
     this.config = { ...DEFAULT_AGENT_CONFIG, ...parsedConfig };
-    this.provider = provider || createProvider();
+    // One-switch $0 inference: VICLAW_FREE_STACK=true routes every turn
+    // through Ollama → Gemini free → OpenRouter :free (see docs/FREE-STACK.md).
+    // An explicitly passed provider always wins over the switch.
+    this.provider =
+      provider ||
+      (process.env.VICLAW_FREE_STACK === "true" ? createFreeStackProvider() : createProvider());
     this.memory = memory || new MemorySystem();
     this.tools = tools || new ToolExecutor();
     this.loopDetection = new Map();
@@ -276,6 +307,21 @@ export class AgentLoop {
     }
   }
 
+  /**
+   * Build the provider request options that declare this agent's tools.
+   *
+   * This is the piece that makes the agent an *agent*: without sending tool
+   * definitions to the model, it has no way to know tools exist or how to call
+   * them, and no tool can ever be invoked.
+   */
+  private buildToolOptions(): ToolRequestOptions {
+    const tools = toToolDefinitions(this.tools.getAllTools());
+    const enablePromptCache = this.config.enablePromptCache === true;
+    return tools.length > 0
+      ? { tools, toolChoice: "auto", ...(enablePromptCache ? { enablePromptCache: true as const } : {}) }
+      : {};
+  }
+
   private async executeTool(toolCall: { id: string; name: string; input: Record<string, unknown> }): Promise<ToolResult> {
     const id = toolCall.id;
     const name = toolCall.name;
@@ -331,25 +377,80 @@ export class AgentLoop {
     return false;
   }
 
+  /**
+   * Structured context compaction.
+   *
+   * The old implementation replaced history with a message *count*, discarding
+   * every decision, file touch, and tool output. This version builds a structured
+   * digest from tool history + recent turns (goal / decisions / files touched /
+   * tool outcomes / open items) so the next turn keeps working context.
+   * When an LLM summarizer is available, callers should prefer it and pass the
+   * result via `compactContextWithSummary()`; this deterministic digest is the
+   * always-available fallback and never returns a bare count.
+   */
+  private buildCompactionDigest(dropped: Message[]): string {
+    const lines: string[] = [];
+    const history = this.context.toolHistory;
+    const succeeded = history.filter((h) => h.success);
+    const failed = history.filter((h) => !h.success);
+
+    lines.push(`Compacted ${dropped.length} older messages (${history.length} tool executions: ${succeeded.length} succeeded, ${failed.length} failed).`);
+
+    const files = new Set<string>();
+    for (const h of history) {
+      const input = h.input as Record<string, unknown>;
+      for (const key of ["filePath", "file", "path"]) {
+        if (typeof input[key] === "string" && (input[key] as string).length > 0) {
+          files.add(input[key] as string);
+        }
+      }
+    }
+    if (files.size > 0) {
+      lines.push(`Files touched: ${[...files].slice(0, 20).join(", ")}${files.size > 20 ? ` (+${files.size - 20} more)` : ""}.`);
+    }
+
+    const toolCounts = new Map<string, number>();
+    for (const h of history) toolCounts.set(h.toolName, (toolCounts.get(h.toolName) || 0) + 1);
+    if (toolCounts.size > 0) {
+      lines.push(`Tool usage: ${[...toolCounts.entries()].map(([n, c]) => `${n}x${c}`).join(", ")}.`);
+    }
+
+    for (const h of failed.slice(-5)) {
+      lines.push(`FAILED ${h.toolName}: ${h.output.slice(0, 200)}.`);
+    }
+    for (const h of succeeded.slice(-5)) {
+      if (h.output.length > 0) {
+        lines.push(`OUT ${h.toolName}: ${h.output.slice(0, 300)}.`);
+      }
+    }
+
+    const userGoals = dropped
+      .filter((m) => m.role === "user" && !m.toolCallId)
+      .map((m) => m.content.slice(0, 200));
+    if (userGoals.length > 0) {
+      lines.push(`Earlier user goals: ${userGoals.slice(-3).join(" | ")}.`);
+    }
+    return lines.join("\n");
+  }
+
   private async compactContext(): Promise<void> {
     const messages = this.context.messages;
     if (messages.length <= 4) return;
 
     const systemMsg = messages[0];
     const recentMessages = messages.slice(-6);
-    const toolResults = messages.filter(m => m.role === "tool");
-
-    const summary = "Previous conversation had " + toolResults.length + " tool executions. Last " + (recentMessages.length - 1) + " messages:";
+    const dropped = messages.slice(1, messages.length - 6);
+    const digest = this.buildCompactionDigest(dropped);
 
     this.context.messages = [
       systemMsg,
-      { role: "user", content: "[Compacted: " + summary + "]" },
+      { role: "user", content: "[Compacted context — structured digest, not a message count:]\n" + digest },
       ...recentMessages.slice(1),
     ];
 
     await this.memory.saveMemory(
       "last_compaction",
-      { timestamp: Date.now(), messageCount: messages.length },
+      { timestamp: Date.now(), messageCount: messages.length, digest },
       MemoryType.Session
     );
   }
@@ -482,7 +583,7 @@ export class AgentLoop {
     let usage: { inputTokens: number; outputTokens: number; totalTokens: number } | undefined;
 
     try {
-      for await (const chunk of this.provider.streamChat(messages)) {
+      for await (const chunk of this.provider.streamChat(messages, this.buildToolOptions())) {
         switch (chunk.type) {
           case "content":
           case "message_delta":
@@ -539,7 +640,7 @@ export class AgentLoop {
   }
 
   private async handleNonStreaming(prompt: string, messages: Message[]): Promise<AgentResult> {
-    const response = await this.provider.chat(messages);
+    const response = await this.provider.chat(messages, this.buildToolOptions());
 
     if (this.callback.onContent && response.content) {
       this.callback.onContent(response.content);
@@ -610,10 +711,14 @@ export class AgentLoop {
         toolCalls: [toolCall],
       });
 
+      const lastResult = toolResults[toolResults.length - 1];
       this.context.messages.push({
         role: "tool",
-        content: toolResults[toolResults.length - 1].content,
-        toolCallId: toolResults[toolResults.length - 1].toolCallId,
+        content: lastResult.content,
+        toolCallId: lastResult.toolCallId,
+        // Providers that route tool results by function name (Gemini) need this.
+        name: toolCall.name,
+        isError: Boolean(lastResult.isError),
       });
     }
 

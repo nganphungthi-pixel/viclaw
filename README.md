@@ -1,26 +1,25 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/🦞-Clawdra-000000?style=flat">
-    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🦞-Clawdra-FFFFFF?style=flat">
-    <img alt="clawdra" height="48" src="https://img.shields.io/badge/🦞%20Clawdra-black?style=flat">
+    <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/🦞-Viclaw-000000?style=flat">
+    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🦞-Viclaw-FFFFFF?style=flat">
+    <img alt="viclaw" height="48" src="https://img.shields.io/badge/🦞%20Viclaw-black?style=flat">
   </picture>
 </p>
 
 <p align="center">
-  <strong>The world-class AI coding agent</strong><br>
-  <sub>Smarter. Faster. Connected to everything.</sub>
+  <strong>AI coding agent that runs on your machine</strong><br>
+  <sub>Bring your own provider. Local, scriptable, yours.</sub>
 </p>
 
 <p align="center">
-  <a href="https://github.com/nganphungthi-pixel/clawdra/actions"><img src="https://img.shields.io/github/actions/workflow/status/nganphungthi-pixel/clawdra/test.yml?style=for-the-badge" alt="CI"></a>
-  <a href="https://github.com/nganphungthi-pixel/clawdra/releases"><img src="https://img.shields.io/github/v/release/nganphungthi-pixel/clawdra?include_prereleases&style=for-the-badge" alt="Release"></a>
-  <a href="https://discord.gg"><img src="https://img.shields.io/discord/clawdra?label=Discord&logo=discord&logoColor=white&color=5865F2&style=for-the-badge" alt="Discord"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node-%3E%3D22-brightgreen?style=for-the-badge&logo=node.js&logoColor=white" alt="Node 22+"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.3-3178c6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"></a>
 </p>
 
 ---
 
-**Clawdra** is a fully-featured AI coding agent that runs on your machine. It connects to any AI provider, understands your codebase, researches across the web, reasons through complex problems, and helps you build software — all from your terminal or browser. Built with TypeScript, designed for developers who want an agent that works *their* way.
+**Viclaw** is a fully-featured AI coding agent that runs on your machine. It connects to any AI provider, understands your codebase, researches across the web, reasons through complex problems, and helps you build software — all from your terminal or browser. Built with TypeScript, designed for developers who want an agent that works *their* way.
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> ·
@@ -36,7 +35,7 @@
 
 ## Models (selection + auth)
 
-Clawdra connects to **any** AI provider. You pick the provider, you pay them directly, Clawdra charges nothing.
+Viclaw connects to **any** AI provider. You pick the provider, you pay them directly, Viclaw charges nothing.
 
 - **Ollama** — free, runs locally on your machine. No API key, no internet needed. Best for privacy.
 - **Anthropic** — Claude models. Get API key at [console.anthropic.com](https://console.anthropic.com/settings/keys).
@@ -53,8 +52,8 @@ Model note: while many providers/models are supported, for the best coding exper
 **Requires:** [Node.js](https://nodejs.org) 22+ and [Git](https://git-scm.com).
 
 ```bash
-git clone https://github.com/nganphungthi-pixel/clawdra.git
-cd clawdra
+git clone https://github.com/nganphungthi-pixel/viclaw.git
+cd viclaw
 npm install
 ```
 
@@ -96,8 +95,8 @@ Upgrade note: `git pull && npm install` to get the latest version.
 ## Highlights
 
 - **[Any AI provider](#models)** — Anthropic, OpenAI, Google, OpenRouter, Ollama, Bedrock. Switch anytime.
-- **[Built-in research](#research)** — 8 search engines, deep reasoning, multi-agent task decomposition.
-- **[200+ connectors](#integrations)** — Supabase, Firebase, Vercel, GitHub, Slack, Discord, and more.
+- **[Built-in research](#research)** — multi-engine web search, deep reasoning, multi-agent task decomposition.
+- **[Connector catalog](#integrations)** — config metadata for Supabase, Firebase, Vercel, GitHub, Slack, Discord and many more.
 - **[Enterprise-ready](#governance)** — Company governance, budget tracking, audit logging, sandboxed execution.
 - **[Runs anywhere](#platform)** — Windows, macOS, Linux. Local AI with zero API costs via Ollama.
 - **[Voice support](#voice)** — Transcription (Whisper/Deepgram) + TTS (OpenAI/ElevenLabs/Edge TTS).
@@ -106,21 +105,11 @@ Upgrade note: `git pull && npm install` to get the latest version.
 
 ---
 
-## Star History
-
-<p align="center">
-  <a href="https://star-history.com/#nganphungthi-pixel/clawdra&Date">
-    <img src="https://api.star-history.com/svg?repos=nganphungthi-pixel/clawdra&type=Date" alt="Star History" width="600">
-  </a>
-</p>
-
----
-
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     clawdra core                            │
+│                     viclaw core                            │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐  │
 │  │ Agent    │  │ Tool     │  │ Memory   │  │ Learning   │  │
@@ -128,8 +117,8 @@ Upgrade note: `git pull && npm install` to get the latest version.
 │  └──────────┘  └──────────┘  └──────────┘  └────────────┘  │
 │       │              │             │              │          │
 │  ┌────┴─────┐  ┌─────┴────┐  ┌────┴─────┐  ┌───┴──────┐   │
-│  │ Provider │  │ Sandbox  │  │ Vector   │  │ Hook     │   │
-│  │ Router   │  │ Manager  │  │ Store    │  │ System   │   │
+│  │ Provider │  │ Sandbox  │  │ Memory   │  │ Hook     │   │
+│  │ Router   │  │ Manager  │  │ System   │  │ System   │   │
 │  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
 │                                                             │
 │  Channels                                                   │
@@ -153,7 +142,7 @@ Upgrade note: `git pull && npm install` to get the latest version.
 ### Core platform
 - **Agent loop** — streaming, retry logic, loop detection, context compaction
 - **Provider abstraction** — 6 providers with automatic fallback chains
-- **Tool system** — Read, Write, Edit, Bash, WebSearch, WebFetch, Memory, Skills, Browser, MCP
+- **Tool system** — Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch, Memory, Skills, Browser, MCP
 - **Learning engine** — records interactions, analyzes failures, extracts patterns
 
 ### Channels
@@ -164,10 +153,10 @@ Upgrade note: `git pull && npm install` to get the latest version.
 - **Telegram** — bot integration with group support
 - **Discord** — guild and channel support
 - **Slack** — Bolt-based integration with socket mode
-- **Voice** — speak to Clawdra, get spoken responses
+- **Voice** — speak to Viclaw, get spoken responses
 
 ### Research & reasoning
-- **8 search engines** — Google, Brave, Bing, DuckDuckGo, Tavily, Exa, GitHub, Yahoo
+- **Search engines** — Google (Serper), Brave, Bing, DuckDuckGo, Tavily, Exa, GitHub. Most need an API key; DuckDuckGo works keyless.
 - **Deep reasoning** — chain-of-thought analysis with 4 depth modes (quick/standard/deep/expert)
 - **Multi-agent** — spawn sub-agents for parallel task decomposition
 - **Expertise patterns** — auto-detects context (Next.js, React, Tailwind, WordPress, etc.)
@@ -188,7 +177,7 @@ Upgrade note: `git pull && npm install` to get the latest version.
 - **Plugin system** — 30+ registration methods, hot-reload support
 - **Config system** — hot-reload config with audit trail and atomic writes
 - **Docker** — multi-stage build + docker compose with profiles
-- **Tests** — 43 passing tests across providers, tools, memory, agent, security
+- **Tests** — 128 passing tests across providers, tools, memory, agent, security and tool-calling wire format
 
 ---
 
@@ -230,7 +219,7 @@ Sentry · Grafana · Honeycomb · Dynatrace · Socket · Postman · Kubernetes
 
 ## Configuration
 
-Clawdra is configured via `.env` file. After `npm install`:
+Viclaw is configured via `.env` file. After `npm install`:
 
 ```bash
 cp .env.example .env
@@ -265,19 +254,19 @@ cp .env.example .env
 ## Project structure
 
 ```
-clawdra/
+viclaw/
 ├── src/
 │   ├── agent/          # Agent loop, learning, sub-agents, streaming
 │   ├── channels/       # Telegram, Discord, Slack, Webhook
 │   ├── commands/       # 27 slash commands
 │   ├── config/         # Hot-reload config with audit trail
-│   ├── connectors/     # 200+ service connectors
+│   ├── connectors/     # Service connector catalog (config metadata)
 │   ├── expertise/      # Domain expertise patterns
 │   ├── gateway/        # WebSocket server + Web UI
 │   ├── governance/     # Company management, budgets, org charts
 │   ├── hooks/          # Pre/post processing pipeline
 │   ├── mcp/            # Model Context Protocol integration
-│   ├── memory/         # JSON + SQLite + vector store
+│   ├── memory/         # JSON + SQLite memory
 │   ├── platform/       # Cross-platform (Windows/macOS/Linux)
 │   ├── plugins/        # Plugin API with 30+ registration methods
 │   ├── providers/      # AI provider abstraction (6 providers)
@@ -291,7 +280,7 @@ clawdra/
 │   ├── voice/          # Transcription + TTS
 │   ├── tui/            # React terminal UI
 │   └── cli.ts          # Main entry point
-├── tests/              # 43 passing tests
+├── tests/              # 128 passing tests
 ├── scripts/            # Setup wizard and utilities
 ├── public/             # Web UI
 ├── Dockerfile
@@ -313,7 +302,7 @@ clawdra/
 | `/research <q>` | Multi-engine web research |
 | `/reason <q>` | Deep chain-of-thought reasoning |
 | `/security` | Run security audit |
-| `/connectors` | Browse 200+ service connectors |
+| `/connectors` | Browse the service connector catalog |
 | `/plugins` | List available plugins |
 | `/skills` | List available skills |
 | `/session` | Session management |
@@ -377,18 +366,10 @@ MIT License — see the [LICENSE](LICENSE) file.
 
 ## ☕ Support This Project
 
-Clawdra is free and open source. If it helps you build something great, consider buying me a coffee:
-
-<p align="left">
-  <a href="https://paypal.me/YOUR_LINK_HERE" target="_blank">
-    <img src="https://img.shields.io/badge/☕%20Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee" height="36">
-  </a>
-</p>
-
-Every cup of coffee fuels more features. Thank you! 🙏
+Viclaw is free and open source. If it helps you build something great, good issues and contributions are very welcome.
 
 ---
 
 <p align="center">
-  <sub><strong>clawdra</strong> — Making AI coding agents smarter, one commit at a time. 🚀</sub>
+  <sub><strong>viclaw</strong> — an AI coding agent you can actually read the source of. 🚀</sub>
 </p>

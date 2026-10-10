@@ -705,7 +705,7 @@ Use markdown formatting with code examples.`,
 
       try {
         let readme = `# ${projectName}\n\n`;
-        readme += `> Auto-generated documentation by clawdra\n\n`;
+        readme += `> Auto-generated documentation by viclaw\n\n`;
         readme += `## Table of Contents\n`;
         readme += `- [Installation](#installation)\n`;
         readme += `- [Usage](#usage)\n`;

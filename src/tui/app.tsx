@@ -1,5 +1,5 @@
 /**
- * Clawdra TUI - Terminal User Interface
+ * Viclaw TUI - Terminal User Interface
  * Built with Ink (React for CLI)
  * Professional, interactive terminal experience with streaming support
  */
@@ -36,7 +36,7 @@ function StatusBar({ provider, model, thinkingLevel, isStreaming, messageCount }
   return (
     <Box flexDirection="column" paddingX={1}>
       <Box>
-        <Text bold color="cyan">🔥 CLAWDRA</Text>
+        <Text bold color="cyan">🔥 VICLAW</Text>
         <Text dimColor> | </Text>
         <Text color="yellow">{provider}</Text>
         <Text dimColor> | </Text>
@@ -72,7 +72,7 @@ function MessageList({ messages }: { messages: Message[] }) {
           {msg.role === 'assistant' && (
             <Box flexDirection="column">
               <Box>
-                <Text bold color="green">Clawdra:</Text>
+                <Text bold color="green">Viclaw:</Text>
               </Box>
               <Box paddingLeft={1}>
                 <Text wrap="wrap">{msg.content}</Text>
@@ -156,7 +156,7 @@ function HelpScreen() {
     ['/research <q>', 'Multi-engine research'],
     ['/reason <q>', 'Deep reasoning'],
     ['/security', 'Security audit'],
-    ['/connectors', 'Browse 200+ connectors'],
+    ['/connectors', 'Browse connector catalog (config metadata)'],
     ['/plugins', 'Browse plugins'],
     ['/skills', 'Browse skills'],
     ['/session', 'Session stats'],
@@ -164,12 +164,12 @@ function HelpScreen() {
     ['/bughunt', 'Scan for bugs'],
     ['/memory', 'Memory status'],
     ['/clear', 'Clear chat'],
-    ['/exit', 'Exit Clawdra'],
+    ['/exit', 'Exit Viclaw'],
   ];
 
   return (
     <Box flexDirection="column" padding={1}>
-      <Text bold color="cyan">🔥 CLAWDRA - World-Class AI Coding Agent</Text>
+      <Text bold color="cyan">VICLAW - AI coding agent on your machine</Text>
       <Text></Text>
       <Text bold>Commands:</Text>
       {commands.map(([cmd, desc]) => (
@@ -195,20 +195,20 @@ interface StreamingCallback {
   onError: (error: Error) => void;
 }
 
-interface ClawdraTUIProps {
+interface ViclawTUIProps {
   provider: string;
   model: string;
   thinkingLevel: string;
   onMessage: (message: string, callback: StreamingCallback) => Promise<void>;
 }
 
-export function ClawdraTUI({ provider, model, thinkingLevel, onMessage }: ClawdraTUIProps) {
+export function ViclawTUI({ provider, model, thinkingLevel, onMessage }: ViclawTUIProps) {
   const { exit } = useApp();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
       role: 'system',
-      content: 'Welcome to Clawdra! Type a message or /help for commands.',
+      content: 'Welcome to Viclaw! Type a message or /help for commands.',
       timestamp: Date.now(),
     },
   ]);
@@ -327,6 +327,6 @@ export function ClawdraTUI({ provider, model, thinkingLevel, onMessage }: Clawdr
 // RENDER FUNCTION
 // ============================================
 
-export function renderTUI(props: ClawdraTUIProps) {
-  return render(<ClawdraTUI {...props} />, { exitOnCtrlC: false });
+export function renderTUI(props: ViclawTUIProps) {
+  return render(<ViclawTUI {...props} />, { exitOnCtrlC: false });
 }

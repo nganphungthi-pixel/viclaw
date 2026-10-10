@@ -205,7 +205,7 @@ export class TTSEngine {
       throw new Error(`OpenAI TTS error: ${response.status}`);
     }
 
-    const outputPath = join(tmpdir(), `clawdra-tts-${Date.now()}.mp3`);
+    const outputPath = join(tmpdir(), `viclaw-tts-${Date.now()}.mp3`);
     const buffer = Buffer.from(await response.arrayBuffer());
     writeFileSync(outputPath, buffer);
 
@@ -238,7 +238,7 @@ export class TTSEngine {
       throw new Error(`ElevenLabs TTS error: ${response.status}`);
     }
 
-    const outputPath = join(tmpdir(), `clawdra-tts-${Date.now()}.mp3`);
+    const outputPath = join(tmpdir(), `viclaw-tts-${Date.now()}.mp3`);
     const buffer = Buffer.from(await response.arrayBuffer());
     writeFileSync(outputPath, buffer);
 
@@ -247,7 +247,7 @@ export class TTSEngine {
 
   private async synthesizeEdgeTTS(text: string): Promise<TTSResult> {
     // Edge TTS - free, no API key needed
-    const outputPath = join(tmpdir(), `clawdra-tts-${Date.now()}.mp3`);
+    const outputPath = join(tmpdir(), `viclaw-tts-${Date.now()}.mp3`);
 
     try {
       // Using edge-tts via subprocess (npm package alternative)

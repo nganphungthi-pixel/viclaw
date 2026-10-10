@@ -1,5 +1,5 @@
 /**
- * Clawdra Skills Registry
+ * Viclaw Skills Registry
  * All skills from Claude's skill catalog + custom implementations
  */
 
@@ -351,7 +351,7 @@ Tools: gif.js, p5.js, ffmpeg for conversion`,
     name: "Next.js Expert",
     description: "Expert-level Next.js development. App Router, Server Components, Server Actions, routing, data fetching, deployment.",
     category: "framework",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["next.js", "nextjs", "app router", "server component", "server action", "getServerSideProps"],
     instructions: `Next.js Expert Mode.
 
@@ -380,7 +380,7 @@ Best practices:
     name: "Supabase Expert",
     description: "Supabase development: PostgreSQL, RLS, Auth, Storage, Edge Functions, Real-time subscriptions.",
     category: "backend",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["supabase", "row level security", "rls", "edge function", "supabase auth", "supabase storage"],
     instructions: `Supabase Expert Mode.
 
@@ -408,7 +408,7 @@ Best practices:
     name: "Vercel Deployment",
     description: "Vercel deployment expertise: Edge Functions, Middleware, preview deployments, environment variables, analytics.",
     category: "devops",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["vercel", "deploy", "edge function", "middleware", "preview deployment", "vercel analytics"],
     instructions: `Vercel Deployment Expert Mode.
 
@@ -435,7 +435,7 @@ Best practices:
     name: "WordPress Development",
     description: "WordPress development: themes, plugins, Gutenberg blocks, REST API, WooCommerce, security.",
     category: "cms",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["wordpress", "wp", "gutenberg", "wp plugin", "wp theme", "woocommerce", "wp-cli"],
     instructions: `WordPress Development Expert Mode.
 
@@ -463,7 +463,7 @@ Best practices:
     name: "Tailwind + shadcn/ui",
     description: "Tailwind CSS and shadcn/ui component development. Utility-first CSS, component variants, accessibility.",
     category: "frontend",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["tailwind", "shadcn", "class-variance", "clsx", "cva", "ui component", "radix"],
     instructions: `Tailwind + shadcn/ui Expert Mode.
 
@@ -490,7 +490,7 @@ Best practices:
     name: "Firebase Expert",
     description: "Firebase development: Firestore, Auth, Cloud Functions, Hosting, Storage, Security Rules.",
     category: "backend",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["firebase", "firestore", "cloud function", "firebase auth", "firebase hosting", "security rules"],
     instructions: `Firebase Expert Mode.
 
@@ -517,7 +517,7 @@ Best practices:
     name: "Resend Email",
     description: "Email development with Resend: React Email components, transactional emails, templates, MJML, deliverability.",
     category: "communication",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["resend", "email", "react email", "transactional email", "mjml", "email template"],
     instructions: `Resend Email Expert Mode.
 
@@ -543,7 +543,7 @@ Best practices:
     name: "GitHub & DevOps",
     description: "GitHub Actions, CI/CD, PR automation, release management, workflow optimization.",
     category: "devops",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["github actions", "ci/cd", "pull request", "workflow", "github api", "release"],
     instructions: `GitHub/DevOps Expert Mode.
 
@@ -570,7 +570,7 @@ Best practices:
     name: "Hostinger Management",
     description: "Hostinger hosting management: domains, DNS, email accounts, databases, SSL, deployment.",
     category: "hosting",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["hostinger", "dns", "domain", "cpanel", "hosting", "ssl certificate"],
     instructions: `Hostinger Management Expert Mode.
 
@@ -597,7 +597,7 @@ Best practices:
     name: "UI/UX Designer",
     description: "UI/UX design: responsive design, accessibility, design systems, user research, prototyping.",
     category: "design",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["ui design", "ux", "responsive", "accessibility", "design system", "wireframe", "prototype"],
     instructions: `UI/UX Design Expert Mode.
 
@@ -626,7 +626,7 @@ Best practices:
     name: "React Expert",
     description: "React development: hooks, concurrent features, state management, performance optimization, patterns.",
     category: "framework",
-    author: "Clawdra",
+    author: "Viclaw",
     triggers: ["react", "jsx", "tsx", "hooks", "useState", "useEffect", "custom hook", "react patterns"],
     instructions: `React Expert Mode.
 

@@ -59,7 +59,7 @@ export interface SQLiteMemoryConfig {
 }
 
 const DEFAULT_SQLITE_CONFIG: Required<SQLiteMemoryConfig> = {
-  dbPath: join(homedir(), '.clawdra', 'memory.sqlite'),
+  dbPath: join(homedir(), '.viclaw', 'memory.sqlite'),
   autoSave: true,
   saveInterval: 30000, // 30 seconds
 };

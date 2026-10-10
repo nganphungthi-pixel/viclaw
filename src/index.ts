@@ -1,5 +1,5 @@
 /**
- * Clawdra Master Index
+ * Viclaw Master Index
  * Exports all systems for unified access
  */
 
@@ -18,7 +18,6 @@ export { ToolExecutor, createToolExecutor } from "./tools/mod.js";
 // Memory
 export { MemorySystem, createMemorySystem, getMemorySystem } from "./memory/mod.js";
 export { SQLiteMemory } from "./memory/sqlite.js";
-export { VectorStore, getVectorStore } from "./memory/vector.js";
 
 // Skills
 export { SkillManager, createBuiltInSkills } from "./skills/mod.js";

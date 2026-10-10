@@ -1,5 +1,5 @@
 /**
- * Clawdra Connectors Registry
+ * Viclaw Connectors Registry
  * ALL connectors from Claude's connector catalog
  * Each connector has config, capabilities, and MCP integration details
  */

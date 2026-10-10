@@ -35,7 +35,7 @@ describe('AgentLoop', () => {
   });
 
   it('should add messages', () => {
-    agent.addMessage('user', 'Clawdra test message');
+    agent.addMessage('user', 'Viclaw test message');
     const context = agent.getContext();
     expect(context.messages.length).toBeGreaterThan(1);
   });

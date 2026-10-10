@@ -351,7 +351,7 @@ export class DockerSandbox {
   private containerId?: string;
 
   constructor(config: SandboxConfig) {
-    this.image = config.image || "clawdra-sandbox:latest";
+    this.image = config.image || "viclaw-sandbox:latest";
   }
 
   async start(): Promise<void> {

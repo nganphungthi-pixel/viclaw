@@ -175,7 +175,7 @@ export class ResearchEngine extends EventEmitter {
   private async searchDuckDuckGo(query: string, limit: number): Promise<SearchResult[]> {
     // DuckDuckGo HTML scraping (no API key needed)
     const response = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Clawdra/1.0" },
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Viclaw/1.0" },
     });
 
     const html = await response.text();
@@ -346,7 +346,7 @@ export class ResearchEngine extends EventEmitter {
   private async fetchContent(url: string): Promise<string | null> {
     try {
       const response = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Clawdra/1.0" },
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Viclaw/1.0" },
         signal: AbortSignal.timeout(10000),
       });
 
