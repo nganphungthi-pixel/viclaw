@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { resolve, isAbsolute, join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { homedir } from "node:os";
+import { buildChildEnv } from "../security/env.js";
 
 export interface SandboxConfig {
   type: "docker" | "process" | "web";
@@ -398,7 +399,8 @@ export class DockerSandbox {
   private runCommand(cmd: string, args: string[], options?: SandboxOptions, startTime?: number): Promise<ExecutionResult> {
     return new Promise((resolve) => {
       const timeout = options?.timeout || 30000;
-      const env = { ...process.env, ...options?.env };
+      // P0-1: scrubbed base; explicit per-call values still merge on top.
+      const env = { ...buildChildEnv(), ...options?.env };
       const cwd = options?.workingDirectory;
 
       const proc = spawn(cmd, args, { env, cwd });
@@ -456,7 +458,8 @@ export class ProcessSandbox {
 
   constructor(config: SandboxConfig) {
     this.workingDirectory = config.workingDirectory || process.cwd();
-    this.env = { ...process.env } as Record<string, string>;
+    // P0-1: stored base env is scrubbed at construction, not inherited whole.
+    this.env = buildChildEnv();
     this.networkEnabled = config.networkIsolation || false;
   }
 

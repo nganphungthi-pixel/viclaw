@@ -6,6 +6,7 @@
 import { EventEmitter } from "node:events";
 import { spawn, ChildProcess } from "node:child_process";
 import { ToolResult } from "../tools/mod.js";
+import { buildChildEnv, isSecretName } from "../security/env.js";
 
 // ============================================
 // MCP TYPES
@@ -22,6 +23,8 @@ export interface MCPServerConfig {
   command: string;
   args: string[];
   env?: Record<string, string>;
+  /** Extra env names passed through to the server (operator responsibility). */
+  envPassthrough?: string[];
   timeout?: number;
 }
 
@@ -63,8 +66,15 @@ export class MCPClient extends EventEmitter {
     this.state.status = "connecting";
 
     try {
+      for (const name of this.config.envPassthrough ?? []) {
+        if (isSecretName(name)) {
+          console.warn(`[viclaw] WARNING: MCP server "${this.config.name}" passes through secret-looking variable "${name}".`);
+        }
+      }
+      // P0-1: MCP servers are third-party code the model talks to — they get
+      // the scrubbed base env plus only operator-configured values.
       this.process = spawn(this.config.command, this.config.args, {
-        env: { ...process.env, ...this.config.env },
+        env: { ...buildChildEnv({ passthrough: this.config.envPassthrough }), ...this.config.env },
         stdio: ["pipe", "pipe", "pipe"],
       });
 

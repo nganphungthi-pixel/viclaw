@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSy
 import { resolve, join, dirname, extname, relative, isAbsolute } from "node:path";
 import { homedir } from "node:os";
 import { GlobTool, GrepTool } from "./search-tools.js";
+import { buildChildEnv, redactSecrets, isSecretName } from "../security/env.js";
 
 export { GlobTool, GrepTool, globToRegExp } from "./search-tools.js";
 
@@ -53,6 +54,14 @@ export interface ToolPermissionConfig {
   timeout?: number;
   sandbox?: boolean;
   permissionMode?: PermissionMode;
+  /**
+   * Extra environment variable NAMES passed into child processes on top of
+   * the allow-listed base (see security/env.ts). Explicitly operator-opted:
+   * anything listed here is visible to every spawned command, so listing a
+   * secret here defeats the scrubbing. Prefer narrow, non-secret values.
+   * Also settable via VICLAW_ENV_PASSTHROUGH (comma-separated) in the CLI.
+   */
+  envPassthrough?: string[];
 }
 
 /** Tools that mutate state outside the agent's own memory. */
@@ -440,9 +449,13 @@ export class BashTool implements Tool {
         // `shell: true`. Combining them makes Node re-wrap the command as
         // `sh -c sh -c <cmd>`, which shifts the command into `$0` and silently
         // executes nothing (observed as an empty newline).
+        // P0-1: the child gets an allow-list-built environment, never the
+        // full parent env. A prompt-injected `env` therefore cannot print
+        // API keys — they are simply not there. Operator additions come only
+        // from explicit envPassthrough (their responsibility).
         const proc = spawn("sh", ["-c", command], {
           cwd: workdir,
-          env: { ...process.env },
+          env: buildChildEnv({ passthrough: context.config.envPassthrough }),
         });
 
         let stdout = "";
@@ -486,7 +499,11 @@ export class BashTool implements Tool {
           const output = noteTruncation(stdout + (stderr ? `\n${stderr}` : ""));
           resolve({
             toolCallId: context.toolCallId,
-            content: output || `Exited with code ${code}`,
+            // P0-1: redact known secret values before the output flows back
+            // to the model (defense in depth: the env is already scrubbed, so
+            // this catches secrets the command itself reconstructs, e.g. by
+            // reading a key file the path policy allowed).
+            content: redactSecrets(output) || `Exited with code ${code}`,
           });
         });
 
@@ -494,7 +511,7 @@ export class BashTool implements Tool {
           clearTimeout(timer);
           resolve({
             toolCallId: context.toolCallId,
-            content: `Error: ${error.message}`,
+            content: redactSecrets(`Error: ${error.message}`),
             isError: true,
           });
         });
@@ -943,6 +960,15 @@ export class ToolExecutor {
       ]),
       config,
     };
+
+    // Hostile-review guard: envPassthrough is operator opt-in, but a typo
+    // like ANTHROPIC_API_KEY would silently un-scrub a secret. Fail loud
+    // once at construction instead of leaking on every spawn.
+    for (const name of config.envPassthrough ?? []) {
+      if (isSecretName(name)) {
+        console.warn(`[viclaw] WARNING: envPassthrough lists secret-looking variable "${name}". Every spawned command will see its value. Remove it unless you fully accept that.`);
+      }
+    }
 
     this.registerCoreTools();
     this.registerExtensionTools();

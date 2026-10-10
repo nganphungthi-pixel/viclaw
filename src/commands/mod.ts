@@ -7,6 +7,7 @@ import { AgentLoop, ThinkingLevel } from '../agent/mod.js';
 import { SkillManager, createBuiltInSkills } from '../skills/mod.js';
 import { getMemorySystem } from '../memory/mod.js';
 import { createProvider, detectProvider } from '../providers/mod.js';
+import { buildChildEnv } from '../security/env.js';
 
 export interface CommandContext {
   agent: AgentLoop;
@@ -267,9 +268,9 @@ export class CommandRegistry {
       execute: async (args, context) => {
         const { spawn } = await import('node:child_process');
         
-        // Get git diff
+        // Get git diff (P0-1: scrubbed env; spawn without env inherits all secrets)
         const diff = await new Promise<string>((resolve) => {
-          const proc = spawn('git', ['diff', '--cached']);
+          const proc = spawn('git', ['diff', '--cached'], { env: buildChildEnv() });
           let output = '';
           proc.stdout.on('data', (data) => output += data.toString());
           proc.on('close', () => resolve(output));
@@ -278,7 +279,7 @@ export class CommandRegistry {
         if (!diff || diff.trim().length === 0) {
           // Try unstaged changes
           const unstaged = await new Promise<string>((resolve) => {
-            const proc = spawn('git', ['diff']);
+            const proc = spawn('git', ['diff'], { env: buildChildEnv() });
             let output = '';
             proc.stdout.on('data', (data) => output += data.toString());
             proc.on('close', () => resolve(output));

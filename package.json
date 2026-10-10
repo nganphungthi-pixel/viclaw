@@ -40,6 +40,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "setup": "node scripts/setup-wizard.js",
     "channels:start": "tsx src/channels/manager.ts",
     "voice:synthesize": "tsx src/voice/cli.ts",
