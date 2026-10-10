@@ -496,6 +496,31 @@ class Viclaw {
     });
   }
 
+  /**
+   * Single non-interactive turn for `viclaw ask <query>`: runs the query
+   * through the agent loop, prints the final answer, and returns — never
+   * drops into the interactive prompt. Provider failures surface as a clean
+   * error (not a hang, not an empty chat).
+   */
+  async askOnce(query: string): Promise<void> {
+    console.log(`🤔 Processing: ${query}\n`);
+    try {
+      const result = await this.agent.runAgent(query);
+      if (result.content) {
+        console.log(result.content);
+      } else if (result.error) {
+        console.error(`Error: ${result.error}`);
+        process.exitCode = 1;
+      } else {
+        console.log("(no answer produced)");
+        process.exitCode = 1;
+      }
+    } catch (error) {
+      console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+      process.exitCode = 1;
+    }
+  }
+
   // ============================================================
   // START
   // ============================================================
@@ -798,8 +823,9 @@ program
       const result = await engine.reason(query);
       console.log(result.finalAnswer);
     } else {
-      console.log(`🤔 Processing: ${query}\n`);
-      await agent.start();
+      // Single non-interactive turn: the query goes TO the agent (the old
+      // code printed it and then dropped into interactive mode, ignoring it).
+      await agent.askOnce(query);
     }
   });
 
@@ -979,7 +1005,7 @@ Supported Providers:
 1. Anthropic (Claude)  → ANTHROPIC_API_KEY=sk-ant-xxx
 2. OpenAI (GPT)        → OPENAI_API_KEY=sk-xxx
 3. OpenRouter (200+)   → OPENROUTER_API_KEY=sk-ora-xxx
-4. Ollama (LOCAL!)     → ollama pull llama3 (no key needed)
+4. Ollama (LOCAL!)     → ollama pull qwen3-coder:8b (no key needed)
 5. Google Gemini       → GEMINI_API_KEY=xxx
 6. AWS Bedrock         → AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY
 

@@ -59,6 +59,21 @@ describe('SecurityScanner', () => {
     expect(xssVulns.length).toBeGreaterThan(0);
   });
 
+  it('REGRESSION: must not flag every line containing "+" as command injection', async () => {
+    const testDir = join(tmpdir(), 'viclaw-plus-test');
+    mkdirSync(testDir, { recursive: true });
+    writeFileSync(join(testDir, 'math.ts'), `
+      const sum = a + b;
+      const msg = "total: " + sum;
+    `);
+
+    const scanner = new SecurityScanner();
+    const report = await scanner.scanDirectory(testDir);
+
+    const cmdVulns = report.vulns.filter(v => v.category === 'Command Injection');
+    expect(cmdVulns).toHaveLength(0);
+  });
+
   it('should handle empty directory', async () => {
     const testDir = join(tmpdir(), 'viclaw-empty-test');
     mkdirSync(testDir, { recursive: true });

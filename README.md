@@ -205,7 +205,7 @@ A leg that is down, capped, or unconfigured fails fast and the next leg answers.
 ### Ops + packaging
 - **Config system** — hot-reload config with audit trail and atomic writes
 - **Docker** — multi-stage build + docker compose with profiles
-- **Tests** — 159 tests across providers, tools, search, scheduler, mandates, memory, agent, security and tool-calling wire format
+- **Tests** — 160 tests across providers, tools, search, scheduler, mandates, memory, agent, security and tool-calling wire format
 
 ---
 
@@ -316,7 +316,7 @@ viclaw/
 │   ├── voice/          # Transcription + TTS
 │   ├── tui/            # React terminal UI
 │   └── cli.ts          # Main entry point
-├── tests/              # 159 tests
+├── tests/              # 160 tests
 ├── scripts/            # Setup wizard and utilities
 ├── public/             # Web UI
 ├── .github/            # CI (typecheck + tests + build)

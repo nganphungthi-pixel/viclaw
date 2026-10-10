@@ -3,6 +3,26 @@
 All notable changes to Viclaw, newest first. Format follows Keep a Changelog;
 versions follow semver.
 
+## [Unreleased] — 2026-10-10 (docker verification round)
+
+### Fixed (all found by executing in Docker, not by reading)
+
+- Scanner false-positive storm: `&&`/`||` precedence bug flagged every line
+  containing `+` as critical (320 false alarms on our own code) — now 1 info.
+  The failing old test exposed a second gap: SQLi rule missed classic
+  `"..." + input` concatenation; pattern added, suite green.
+- `viclaw ask <query>` printed the query then dropped into interactive mode,
+  ignoring it — now runs one non-interactive turn (`askOnce`) with clean
+  errors and exit codes (verified: keyless 401 surfaces, no hang).
+- Docker was undeployable: no `/health` endpoint (added, incl. session count),
+  ports mapped 3000 vs actual gateway 8080 (aligned to 8080), and container
+  CMD printed help and exited (now runs `serve --host 0.0.0.0`).
+- Ollama default model `llama3` → `qwen3-coder:8b` (coder default matching the
+  free stack); `login` hint updated the same way.
+- Verified live in Docker: full suite **160/160**, `scan`, `status`,
+  `version`, `mcp`, `ask` error path, `research` keyless fallback,
+  `/health` → 200 with gateway warning firing correctly.
+
 ## [Unreleased] — 2026-10-10 (rename)
 
 - Full product rename to **Viclaw**: 266 occurrences across 58 files,

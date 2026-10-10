@@ -53,11 +53,15 @@ RUN addgroup -g 1001 -S viclaw && \
 ENV NODE_ENV=production
 ENV HOME=/home/viclaw
 
-EXPOSE 3000 4000
+# 8080 = WebSocket gateway + Web UI (`serve` default port); 4000 = webhook channel.
+EXPOSE 8080 4000
 
 USER viclaw
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
+  CMD curl -f http://localhost:8080/health || exit 1
 
-CMD ["node", "dist/cli.js"]
+# Run the gateway (not a bare CLI that would print help and exit). Binds all
+# interfaces inside the container; publish selectively in compose. Set
+# GATEWAY_TOKEN when the port leaves localhost.
+CMD ["node", "dist/cli.js", "serve", "--host", "0.0.0.0"]
