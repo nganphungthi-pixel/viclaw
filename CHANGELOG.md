@@ -3,6 +3,17 @@
 All notable changes to Viclaw, newest first. Format follows Keep a Changelog;
 versions follow semver.
 
+## [Unreleased] — 2026-10-10 (npm verification round)
+
+### Fixed
+
+- Windows-only path gating failure: `isWithinDir` appended `/` while Windows
+  resolves `\`, denying every allowed path on Windows (6 test failures;
+  Linux Docker stayed green and hid it). Separators normalized first, with a
+  cross-platform unit test locking both styles. Suite: **161/161** on Windows
+  npm (also re-verified: typecheck clean, build + CLI smoke on `dist/`,
+  `npm pack` includes `dist/`, proofs 23/23 + 24/24).
+
 ## [Unreleased] — 2026-10-10 (docker verification round)
 
 ### Fixed (all found by executing in Docker, not by reading)

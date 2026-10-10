@@ -168,6 +168,20 @@ describe('Permission Modes', () => {
   });
 });
 
+describe('isWithinDir', () => {
+  it('blocks sibling-prefix bypass on both separator styles', async () => {
+    const { isWithinDir } = await import('../src/tools/mod.js');
+    expect(isWithinDir('/app/sub/file', '/app')).toBe(true);
+    expect(isWithinDir('/app', '/app')).toBe(true);
+    expect(isWithinDir('/app-evil/secret', '/app')).toBe(false);
+    // Windows backslashes (regression: "/" suffix never matched "\" paths,
+    // denying everything on Windows while Linux stayed green).
+    expect(isWithinDir('C:\\a\\b', 'C:\\a')).toBe(true);
+    expect(isWithinDir('C:\\a', 'C:\\a')).toBe(true);
+    expect(isWithinDir('C:\\a-evil\\x', 'C:\\a')).toBe(false);
+  });
+});
+
 describe('Untrusted Web Content', () => {
   it('wraps content with provenance + delimiters and caps length', async () => {
     const { wrapUntrustedWebContent, MAX_UNTRUSTED_CHARS } = await import('../src/tools/mod.js');

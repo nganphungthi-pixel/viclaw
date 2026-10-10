@@ -133,9 +133,16 @@ export function wrapUntrustedWebContent(source: string, content: string): string
  * block-entry of `/a/blocked`. The trailing separator closes that hole.
  */
 export function isWithinDir(resolved: string, dir: string): boolean {
-  if (resolved === dir) return true;
-  const withSep = dir.endsWith("/") || dir.endsWith("\\") ? dir : dir + "/";
-  return resolved.startsWith(withSep);
+  // Normalize separators first: Windows resolves to backslashes while a
+  // hardcoded "/" suffix never matches ("C:\a" + "/" vs "C:\a\b"). Without
+  // this, every allowed path is denied on Windows (caught by npm run here;
+  // Linux Docker stayed green and hid it).
+  const norm = (p: string) => p.replace(/\\/g, "/");
+  const r = norm(resolved);
+  const d = norm(dir);
+  if (r === d) return true;
+  const withSep = d.endsWith("/") ? d : d + "/";
+  return r.startsWith(withSep);
 }
 
 function isPathAllowed(path: string, config: ToolPermissionConfig): boolean {
