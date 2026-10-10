@@ -106,7 +106,11 @@ class Viclaw {
     // Command registry
     this.commandRegistry = new CommandRegistry(this.skillManager);
 
-    // Tool executor with sandbox
+    // Tool executor with sandbox. VICLAW_ENV_PASSTHROUGH (comma-separated)
+    // opts extra variable NAMES into child processes. It is YOUR
+    // responsibility: anything listed here is visible to every spawned
+    // command, so never list secrets — prefer fixing the tool to not need
+    // them (e.g. pass tokens via files or scoped config instead).
     const tools = createToolExecutor({
       sandbox: config.enableSandbox,
       timeout: 120000,
@@ -114,6 +118,10 @@ class Viclaw {
       blockedPaths: [],
       allowedCommands: [],
       blockedCommands: ['rm -rf /', 'mkfs', 'dd if='],
+      envPassthrough: (process.env.VICLAW_ENV_PASSTHROUGH || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0),
     });
 
     // Agent loop with all systems wired

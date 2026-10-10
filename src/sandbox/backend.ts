@@ -7,6 +7,7 @@
 import { spawn, SpawnOptions } from "node:child_process";
 import { resolve, isAbsolute, join, normalize } from "node:path";
 import { existsSync, statSync } from "node:fs";
+import { buildChildEnv } from "../security/env.js";
 
 export interface SandboxBackendExecSpec {
   command: string;
@@ -324,10 +325,12 @@ function execCommand(command: string, options: { cwd?: string; timeout?: number 
     const startTime = Date.now();
     const timeout = options.timeout || 120000;
 
+    // P0-1: no env option means full parent inherit — scrub instead.
     const proc = spawn("sh", ["-c", command], {
       cwd: options.cwd,
       timeout,
       shell: true,
+      env: buildChildEnv(),
     });
 
     let stdout = "";
