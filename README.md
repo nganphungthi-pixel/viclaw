@@ -1,14 +1,14 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/🦞-Viclaw-000000?style=flat">
-    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🦞-Viclaw-FFFFFF?style=flat">
-    <img alt="viclaw" height="48" src="https://img.shields.io/badge/🦞%20Viclaw-black?style=flat">
+    <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/🧭-Viclaw-000000?style=flat">
+    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🧭-Viclaw-FFFFFF?style=flat">
+    <img alt="viclaw" height="48" src="https://img.shields.io/badge/🧭%20Viclaw-black?style=flat">
   </picture>
 </p>
 
 <p align="center">
   <strong>AI coding agent that runs on your machine</strong><br>
-  <sub>Bring your own provider. Local, scriptable, yours.</sub>
+  <sub>Bring your own provider — or pay nothing at all with the $0 free stack.</sub>
 </p>
 
 <p align="center">
@@ -19,14 +19,14 @@
 
 ---
 
-**Viclaw** is a fully-featured AI coding agent that runs on your machine. It connects to any AI provider, understands your codebase, researches across the web, reasons through complex problems, and helps you build software — all from your terminal or browser. Built with TypeScript, designed for developers who want an agent that works *their* way.
+**Viclaw** is an AI coding agent that runs on your machine. It connects to any AI provider, understands your codebase, researches across the web, reasons through complex problems, and helps you build software — all from your terminal or browser. Built with TypeScript, designed for developers who want an agent that works *their* way.
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> ·
+  <a href="#free-stack">Free Stack</a> ·
   <a href="#models">Models</a> ·
   <a href="#architecture">Architecture</a> ·
   <a href="#features">Features</a> ·
-  <a href="#integrations">Integrations</a> ·
   <a href="#security">Security</a> ·
   <a href="#contributing">Contributing</a>
 </p>
@@ -43,7 +43,7 @@ Viclaw connects to **any** AI provider. You pick the provider, you pay them dire
 - **OpenRouter** — 200+ models from one key. Some models free. Get key at [openrouter.ai](https://openrouter.ai/keys).
 - **Google** — Gemini models. Free tier available. Get key at [aistudio.google.com](https://aistudio.google.com/app/apikey).
 
-Model note: while many providers/models are supported, for the best coding experience we recommend **Claude Sonnet 4** (Anthropic) or **GPT-4o** (OpenAI). For free local usage, **Qwen 2.5 72B** via Ollama is excellent.
+Model note: while many providers/models are supported, for the best coding experience we recommend **Claude Sonnet 4** (Anthropic) or **GPT-4o** (OpenAI). For free local usage, **Qwen3-Coder 8B** via Ollama runs on an 8GB GPU; **Qwen3-Coder 30B** fits a 24GB card.
 
 ---
 
@@ -75,10 +75,11 @@ node scripts/setup.js models
 ```bash
 # 1. Pick your provider & set API key
 cp .env.example .env
-# Edit .env → add ONE provider's API key
+# Edit .env → add ONE provider's API key (or skip keys entirely: see Free Stack)
 
 # 2. Start chatting
-npx tsx src/cli.ts chat
+npm run dev
+# npx tsx src/cli.ts chat
 
 # 3. Try the fancy terminal UI
 npx tsx src/cli.ts chat --tui
@@ -92,16 +93,34 @@ Upgrade note: `git pull && npm install` to get the latest version.
 
 ---
 
+## Free Stack ($0 inference)
+
+No key, no card, no bill. One switch routes every turn cheapest-first:
+
+```bash
+export VICLAW_FREE_STACK=true
+```
+
+1. **Ollama** (local — private, unlimited; `ollama pull qwen3-coder:8b`)
+2. **Gemini free tier** (no card; trains on prompts — never send secrets)
+3. **OpenRouter `:free` router** (auto-selects a free tool-calling model)
+
+A leg that is down, capped, or unconfigured fails fast and the next leg answers. Honest limits: roughly 1–5 real medium tasks/day on free quotas; local small models score below frontier on hard multi-file work — supervise them (`plan`/`ask` modes). Overrides: `OLLAMA_MODEL`, `GEMINI_MODEL`, `OPENROUTER_FREE_MODEL`.
+
+---
+
 ## Highlights
 
-- **[Any AI provider](#models)** — Anthropic, OpenAI, Google, OpenRouter, Ollama, Bedrock. Switch anytime.
+- **[Any AI provider](#models)** — Anthropic, OpenAI, Google, OpenRouter, Ollama, Bedrock. Switch anytime, with automatic fallback chains — including the $0 free stack.
 - **[Built-in research](#research)** — multi-engine web search, deep reasoning, multi-agent task decomposition.
 - **[Connector catalog](#integrations)** — config metadata for Supabase, Firebase, Vercel, GitHub, Slack, Discord and many more.
-- **[Enterprise-ready](#governance)** — Company governance, budget tracking, audit logging, sandboxed execution.
+- **[Team controls](#governance)** — budgets, approval workflows, audit logging, sandboxed execution. (No SSO/SOC2 — see [SECURITY.md](SECURITY.md) for the honest threat model.)
 - **[Runs anywhere](#platform)** — Windows, macOS, Linux. Local AI with zero API costs via Ollama.
+- **[Unattended runs](#scheduler)** — cron-style scheduler with persistent jobs and a run ledger.
+- **[Money safety](#mandates)** — AP2-shaped mandate ledger: the model can only ever receive approve/deny, never a transfer capability.
 - **[Voice support](#voice)** — Transcription (Whisper/Deepgram) + TTS (OpenAI/ElevenLabs/Edge TTS).
-- **[MCP integration](#mcp)** — Full Model Context Protocol support with auto-discovery.
-- **[Plugin system](#plugins)** — 30+ registration methods, hot-reload, community extensible.
+- **[MCP integration](#mcp)** — Model Context Protocol over stdio transport with auto-discovery.
+- **[Plugin system](#plugins)** — hot-reload, community extensible.
 
 ---
 
@@ -109,17 +128,19 @@ Upgrade note: `git pull && npm install` to get the latest version.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     viclaw core                            │
+│                     viclaw core                             │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐  │
 │  │ Agent    │  │ Tool     │  │ Memory   │  │ Learning   │  │
 │  │ Loop     │──│ Executor │──│ System   │──│ Engine     │  │
-│  └──────────┘  └──────────┘  └──────────┘  └────────────┘  │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  │
 │       │              │             │              │          │
 │  ┌────┴─────┐  ┌─────┴────┐  ┌────┴─────┐  ┌───┴──────┐   │
 │  │ Provider │  │ Sandbox  │  │ Memory   │  │ Hook     │   │
 │  │ Router   │  │ Manager  │  │ System   │  │ System   │   │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  │
+│                                                             │
+│  Scheduler (at/every/cron) │ Mandate ledger (approve/deny)  │
 │                                                             │
 │  Channels                                                   │
 │  Telegram │ Discord │ Slack │ Webhook │ CLI │ WebSocket     │
@@ -130,25 +151,30 @@ Upgrade note: `git pull && npm install` to get the latest version.
 │  Governance                                                 │
 │  Companies │ Agents │ Issues │ Budgets │ Org Chart           │
 │                                                             │
-│  MCP Integration                                            │
+│  MCP Integration (stdio)                                    │
 │  Filesystem │ Git │ GitHub │ Postgres │ Browser              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Everything we built so far
+## Everything built so far
 
 ### Core platform
-- **Agent loop** — streaming, retry logic, loop detection, context compaction
-- **Provider abstraction** — 6 providers with automatic fallback chains
+- **Agent loop** — streaming, retry logic, loop detection, structured context compaction
+- **Provider abstraction** — 6 providers with fallback chains; prompt caching on Anthropic by default
 - **Tool system** — Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch, Memory, Skills, Browser, MCP
+- **Permission modes** — `normal` / `acceptEdits` / `ask` / `plan` / `deny` (`plan` is read-only, `ask` fails closed)
 - **Learning engine** — records interactions, analyzes failures, extracts patterns
 
+### Scheduler + money safety
+- **Scheduler** — `at` / `every` / `cron` jobs, persistent store, run ledger, exponential-backoff retries, per-run timeouts, overdue-skip on restart
+- **Mandate ledger** — human-approved spending mandates (amount range, payee allowlist, daily cap, expiry); idempotent authorization with hash-bound receipts
+
 ### Channels
-- **CLI** — interactive readline with 27 slash commands
+- **CLI** — interactive readline with 24 slash commands
 - **TUI** — React/Ink terminal UI with streaming output
-- **WebSocket** — real-time gateway for web clients and external apps
+- **WebSocket** — token-authenticated gateway for web clients and external apps
 - **Web UI** — browser-based chat interface at `http://localhost:8080`
 - **Telegram** — bot integration with group support
 - **Discord** — guild and channel support
@@ -156,28 +182,30 @@ Upgrade note: `git pull && npm install` to get the latest version.
 - **Voice** — speak to Viclaw, get spoken responses
 
 ### Research & reasoning
-- **Search engines** — Google (Serper), Brave, Bing, DuckDuckGo, Tavily, Exa, GitHub. Most need an API key; DuckDuckGo works keyless.
+- **Search engines** — Exa (default), Brave, Serper/Bing, Tavily, GitHub, DuckDuckGo keyless fallback
 - **Deep reasoning** — chain-of-thought analysis with 4 depth modes (quick/standard/deep/expert)
 - **Multi-agent** — spawn sub-agents for parallel task decomposition
 - **Expertise patterns** — auto-detects context (Next.js, React, Tailwind, WordPress, etc.)
 
 ### Tools + automation
 - **Security scanner** — 20 vulnerability classes (SQLi, XSS, Command Injection, Secrets, etc.)
-- **Governance** — secret detection, approval workflows, audit logging
+- **Governance** — approval workflows, audit logging, budgets with hard stops
 - **Rate limiting** — per-identifier rate limiting with sliding windows
 - **Cost tracking** — token-based cost estimation with budget enforcement
 
 ### Runtime + safety
 - **Sandboxed execution** — Docker and process isolation for code execution
-- **Path validation** — allow/block lists for file access
+- **Path validation** — separator-aware allow/block lists for file access
+- **Command allow-list** — strict binary-token gating for shell commands
+- **SSRF guard** — cloud instance-metadata endpoints refused by WebFetch
+- **Untrusted-web wrapping** — fetched content labelled as data, never instructions
 - **Input validation** — Zod schemas for all tool inputs
 - **Session management** — JSON-based session store with history
 
 ### Ops + packaging
-- **Plugin system** — 30+ registration methods, hot-reload support
 - **Config system** — hot-reload config with audit trail and atomic writes
 - **Docker** — multi-stage build + docker compose with profiles
-- **Tests** — 128 passing tests across providers, tools, memory, agent, security and tool-calling wire format
+- **Tests** — 159 tests across providers, tools, search, scheduler, mandates, memory, agent, security and tool-calling wire format
 
 ---
 
@@ -208,12 +236,18 @@ Sentry · Grafana · Honeycomb · Dynatrace · Socket · Postman · Kubernetes
 
 ## Security
 
+Read [SECURITY.md](SECURITY.md) before exposing anything. Short version:
+
 - **Sandboxed execution** — Docker/process isolation for code execution
-- **Path validation** — allow/block lists for file access
+- **Path validation** — separator-aware allow/block lists (prefix bypass fixed)
 - **Secret detection** — automated scanning for hardcoded credentials
 - **Input validation** — Zod schemas for all tool inputs
 - **Rate limiting** — per-identifier rate limiting
 - **Audit logging** — comprehensive activity tracking with config audit trail
+- **Gateway token** — mandatory when the WebSocket port leaves localhost
+- **Known limits** — no SSO/SOC2, `ask` mode fails closed instead of prompting, Bash needs Unix `sh`
+
+Report vulnerabilities privately — see [SECURITY.md](SECURITY.md).
 
 ---
 
@@ -225,28 +259,28 @@ Viclaw is configured via `.env` file. After `npm install`:
 cp .env.example .env
 ```
 
-```json5
-{
-  // Pick ONE provider
-  "OLLAMA_HOST": "http://localhost:11434",          // Free, local
-  // "ANTHROPIC_API_KEY": "sk-ant-...",             // Claude models
-  // "OPENAI_API_KEY": "sk-...",                    // GPT models
-  // "OPENROUTER_API_KEY": "sk-or-...",             // 200+ models
-  // "GEMINI_API_KEY": "...",                       // Gemini models
+```bash
+# Pick ONE provider (or use the free stack below — no keys needed)
+OLLAMA_HOST=http://localhost:11434          # Free, local
+# ANTHROPIC_API_KEY=sk-ant-...              # Claude models
+# OPENAI_API_KEY=sk-...                     # GPT models
+# OPENROUTER_API_KEY=sk-or-...              # 200+ models
+# GEMINI_API_KEY=...                        # Gemini models, free tier available
 
-  // Optional: Override default model
-  // "ANTHROPIC_MODEL": "claude-sonnet-4-20250514",
-  // "OPENAI_MODEL": "gpt-4o",
+# $0 inference: Ollama -> Gemini free -> OpenRouter :free
+# VICLAW_FREE_STACK=true
 
-  // Optional: Web search
-  // "TAVILY_API_KEY": "...",
-  // "EXA_API_KEY": "...",
+# Gateway (set a token if the port leaves localhost)
+# GATEWAY_TOKEN=change-me-to-a-long-random-secret
 
-  // Optional: Channels
-  // "TELEGRAM_BOT_TOKEN": "...",
-  // "DISCORD_BOT_TOKEN": "...",
-  // "SLACK_BOT_TOKEN": "...",
-}
+# Optional: Web search
+# EXA_API_KEY=...
+# TAVILY_API_KEY=...
+
+# Optional: Channels
+# TELEGRAM_BOT_TOKEN=...
+# DISCORD_BOT_TOKEN=...
+# SLACK_BOT_TOKEN=...
 ```
 
 ---
@@ -258,33 +292,40 @@ viclaw/
 ├── src/
 │   ├── agent/          # Agent loop, learning, sub-agents, streaming
 │   ├── channels/       # Telegram, Discord, Slack, Webhook
-│   ├── commands/       # 27 slash commands
+│   ├── commands/       # 24 slash commands
 │   ├── config/         # Hot-reload config with audit trail
 │   ├── connectors/     # Service connector catalog (config metadata)
 │   ├── expertise/      # Domain expertise patterns
-│   ├── gateway/        # WebSocket server + Web UI
+│   ├── gateway/        # Token-authenticated WebSocket server + Web UI
 │   ├── governance/     # Company management, budgets, org charts
 │   ├── hooks/          # Pre/post processing pipeline
-│   ├── mcp/            # Model Context Protocol integration
+│   ├── mandates/       # AP2-shaped spending-mandate ledger
+│   ├── mcp/            # Model Context Protocol (stdio transport)
 │   ├── memory/         # JSON + SQLite memory
 │   ├── platform/       # Cross-platform (Windows/macOS/Linux)
-│   ├── plugins/        # Plugin API with 30+ registration methods
-│   ├── providers/      # AI provider abstraction (6 providers)
+│   ├── plugins/        # Plugin API with hot-reload
+│   ├── providers/      # AI provider abstraction (6 providers + free stack)
 │   ├── reasoning/      # Chain-of-thought reasoning engine
 │   ├── research/       # Multi-engine search system
 │   ├── sandbox/        # Docker/process isolation
+│   ├── scheduler/      # at/every/cron jobs + run ledger
 │   ├── security/       # Vulnerability scanners + audit
 │   ├── session/        # Session management
 │   ├── skills/         # Skill system registry
-│   ├── tools/          # Tool execution engine
+│   ├── tools/          # Tool execution engine (Grep/Glob/permission modes)
 │   ├── voice/          # Transcription + TTS
 │   ├── tui/            # React terminal UI
 │   └── cli.ts          # Main entry point
-├── tests/              # 128 passing tests
+├── tests/              # 159 tests
 ├── scripts/            # Setup wizard and utilities
 ├── public/             # Web UI
+├── .github/            # CI (typecheck + tests + build)
 ├── Dockerfile
 ├── docker-compose.yml
+├── SECURITY.md         # Threat model + hardening guide
+├── CONTRIBUTING.md     # Contributor rules
+├── CHANGELOG.md        # Release history
+├── CODE_OF_CONDUCT.md
 ├── .env.example
 └── package.json
 ```
@@ -305,6 +346,7 @@ viclaw/
 | `/connectors` | Browse the service connector catalog |
 | `/plugins` | List available plugins |
 | `/skills` | List available skills |
+| `/search-skills` | Search skills |
 | `/session` | Session management |
 | `/bughunt` | Scan for vulnerabilities |
 | `/config` | Show configuration |
@@ -314,6 +356,8 @@ viclaw/
 | `/commit` | Create git commit |
 | `/review` | Review code |
 | `/think` | Set thinking level |
+| `/max-iter` | Set max agent iterations |
+| `/version` | Show version |
 | `/exit` | Exit |
 
 ---
@@ -331,6 +375,8 @@ npm run test:coverage
 npm test -- tests/providers.test.ts
 ```
 
+New behavior must ship with a test that fails without the fix — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ---
 
 ## Docker
@@ -346,9 +392,13 @@ docker compose --profile local-ai up -d
 docker compose --profile production up -d
 ```
 
+Set `GATEWAY_TOKEN` in your environment when gateway ports are reachable beyond localhost. Redis and Ollama bind `127.0.0.1` only — both are unauthenticated.
+
 ---
 
 ## Contributing
+
+Rules, setup, and definition of done live in [CONTRIBUTING.md](CONTRIBUTING.md). Short version:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
