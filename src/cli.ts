@@ -14,7 +14,7 @@ import * as readline from 'node:readline';
 import 'dotenv/config';
 
 // Core systems
-import { AgentLoop, ThinkingLevel } from './agent/mod.js';
+import { AgentLoop, ThinkingLevel, createAgentLoop } from './agent/mod.js';
 import { createProvider, detectProvider, getDefaultConfig } from './providers/mod.js';
 import { createToolExecutor } from './tools/mod.js';
 import { createMemorySystem } from './memory/mod.js';
@@ -1040,6 +1040,217 @@ API Keys:
   SUPABASE_URL: ${process.env.SUPABASE_URL ? '✅' : '❌'}
   VERCEL_TOKEN: ${process.env.VERCEL_TOKEN ? '✅' : '❌'}
     `);
+  });
+
+// Schedule (unattended runs: at / every / cron + persistent ledger)
+program
+  .command('schedule <action>')
+  .description('Manage scheduled jobs: add|list|log|run|remove|daemon')
+  .option('--name <name>', 'Job name (add)')
+  .option('--prompt <prompt>', 'Agent prompt to run (add)')
+  .option('--every <duration>', 'Interval like 10m, 1h, 1d (add)')
+  .option('--at <timestamp>', 'One-shot ISO timestamp or epoch ms (add)')
+  .option('--cron <expr>', '5-field cron "m h dom mon dow", UTC (add)')
+  .option('--id <id>', 'Job id (remove|run|log)')
+  .option('--tries <n>', 'Max attempts before parking', '6')
+  .option('--timeout <ms>', 'Per-run timeout ms', '600000')
+  .option('--limit <n>', 'Ledger rows to show (log)', '10')
+  .action(async (action, opts) => {
+    const { Scheduler, parseDuration } = await import('./scheduler/mod.js');
+    const stateDir = getPlatformPath('data', 'viclaw');
+    const store = new Scheduler(
+      async () => ({ ok: true, detail: 'scheduler Optional runner (replaced by daemon)' }),
+      { dir: join(stateDir, 'schedules'), tickMs: 60000 }
+    );
+    store.stop();
+
+    if (action === 'add') {
+      const kinds = [opts.every, opts.at, opts.cron].filter(Boolean);
+      if (!opts.name || !opts.prompt) {
+        console.error('Error: add needs --name and --prompt');
+        process.exitCode = 1;
+        return;
+      }
+      if (kinds.length !== 1) {
+        console.error('Error: add needs exactly one of --every, --at, --cron');
+        process.exitCode = 1;
+        return;
+      }
+      const schedule = opts.every
+        ? { kind: 'every' as const, every: opts.every }
+        : opts.at
+          ? { kind: 'at' as const, at: opts.at }
+          : { kind: 'cron' as const, cron: opts.cron };
+      try {
+        const job = store.add(schedule, { name: opts.name, prompt: opts.prompt }, {
+          timeoutMs: parseInt(opts.timeout, 10),
+          maxAttempts: parseInt(opts.tries, 10),
+        });
+        console.log(`✅ Scheduled "${job.payload.name}" (${job.id})`);
+        console.log(`   next run: ${job.nextRunMs ? new Date(job.nextRunMs).toISOString() : 'parked'}`);
+      } catch (error) {
+        console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+        process.exitCode = 1;
+      }
+      return;
+    }
+
+    if (action === 'list') {
+      const jobs = store.list();
+      if (jobs.length === 0) {
+        console.log('No scheduled jobs. Add one: viclaw schedule add --help');
+        return;
+      }
+      for (const j of jobs) {
+        console.log(`${j.enabled ? '●' : '○'} ${j.id}  ${j.payload.name}`);
+        console.log(`  schedule=${JSON.stringify(j.schedule)} next=${j.nextRunMs ? new Date(j.nextRunMs).toISOString() : '-'} last=${j.lastStatus || '-'}`);
+      }
+      return;
+    }
+
+    if (action === 'log') {
+      const rows = store.history(parseInt(opts.limit, 10)).filter((r) => !opts.id || r.jobId === opts.id);
+      if (rows.length === 0) {
+        console.log('No runs recorded yet.');
+        return;
+      }
+      for (const r of rows) {
+        console.log(`[${new Date(r.startedAt).toISOString()}] ${r.status} ${r.jobName} (attempt ${r.attempt}): ${r.detail.slice(0, 160)}`);
+      }
+      return;
+    }
+
+    if (action === 'remove') {
+      if (!opts.id) {
+        console.error('Error: remove needs --id');
+        process.exitCode = 1;
+        return;
+      }
+      console.log(store.remove(opts.id) ? `Removed ${opts.id}` : `No such job: ${opts.id}`);
+      return;
+    }
+
+    if (action === 'run') {
+      if (!opts.id) {
+        console.error('Error: run needs --id');
+        process.exitCode = 1;
+        return;
+      }
+      const agent = createAgentLoop({ maxIterations: 30 });
+      const manual = new Scheduler(
+        async (job) => {
+          const result = await agent.runAgent(job.payload.prompt || '');
+          return { ok: result.done && !result.error, detail: (result.content || result.error || '').slice(0, 500) };
+        },
+        { dir: join(stateDir, 'schedules'), tickMs: 60000 }
+      );
+      const rec = await manual.runNow(opts.id);
+      manual.stop();
+      if (!rec) {
+        console.error(`No such enabled job: ${opts.id}`);
+        process.exitCode = 1;
+        return;
+      }
+      console.log(`${rec.status}: ${rec.detail.slice(0, 500)}`);
+      if (rec.status !== 'ok') process.exitCode = 1;
+      return;
+    }
+
+    if (action === 'daemon') {
+      const agent = createAgentLoop({ maxIterations: 30 });
+      const daemon = new Scheduler(
+        async (job) => {
+          const result = await agent.runAgent(job.payload.prompt || '');
+          return { ok: result.done && !result.error, detail: (result.content || result.error || '').slice(0, 500) };
+        },
+        { dir: join(stateDir, 'schedules'), tickMs: 5000 }
+      );
+      console.log('⏰ Scheduler daemon running (Ctrl+C to stop). Jobs fire unattended; see `schedule log`.');
+      daemon.start();
+      process.on('SIGINT', () => {
+        daemon.stop();
+        console.log('\n👋 Scheduler stopped.');
+        process.exit(0);
+      });
+      await new Promise(() => undefined);
+      return;
+    }
+
+    console.error(`Unknown schedule action: ${action} (add|list|log|run|remove|daemon)`);
+    process.exitCode = 1;
+  });
+
+// Mandates (human-approved spending envelopes; the model only gets approve/deny)
+program
+  .command('mandates <action>')
+  .description('Manage spending mandates: create|list|revoke')
+  .option('--payee <spec>', 'Allowed payee as id:name[:website] (repeatable, create)', (v, acc: string[]) => [...acc, v], [] as string[])
+  .option('--min <n>', 'Min per payment, minor units (create)', '1')
+  .option('--max <n>', 'Max per payment, minor units (create)', '50000')
+  .option('--currency <code>', 'ISO 4217 code (create)', 'USD')
+  .option('--daily <n>', 'Max total per UTC day, minor units (create)', '200000')
+  .option('--expires-in <duration>', 'Lifetime like 24h, 7d (create)', '24h')
+  .option('--approved-by <name>', 'Human approver (create, required)', '')
+  .option('--id <id>', 'Mandate id (revoke)', '')
+  .action(async (action, opts) => {
+    const { MandateLedger } = await import('./mandates/mod.js');
+    const { parseDuration } = await import('./scheduler/mod.js');
+    const stateDir = getPlatformPath('data', 'viclaw');
+    const ledger = new MandateLedger({ dir: join(stateDir, 'mandates') });
+
+    if (action === 'create') {
+      if (!opts.approvedBy) {
+        console.error('Error: create needs --approved-by (a human must approve the mandate)');
+        process.exitCode = 1;
+        return;
+      }
+      const payees = (opts.payee as string[]).map((spec) => {
+        const [id, name, website] = spec.split(':');
+        if (!id || !name) throw new Error(`Bad --payee spec (want id:name[:website]): ${spec}`);
+        return website ? { id, name, website } : { id, name };
+      });
+      try {
+        const m = ledger.createMandate({
+          payeeAllowlist: payees,
+          amountRange: { currency: opts.currency, minMinor: parseInt(opts.min, 10), maxMinor: parseInt(opts.max, 10) },
+          dailyCapMinor: parseInt(opts.daily, 10),
+          expiresAt: Date.now() + parseDuration(opts.expiresIn),
+          humanApprovedBy: opts.approvedBy,
+        });
+        console.log(`✅ Mandate ${m.id} approved by ${m.humanApprovedBy}`);
+        console.log(`   ${m.amountRange.currency} ${m.amountRange.minMinor}-${m.amountRange.maxMinor} per payment, cap ${m.dailyCapMinor}/day, expires ${new Date(m.expiresAt).toISOString()}`);
+      } catch (error) {
+        console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+        process.exitCode = 1;
+      }
+      return;
+    }
+
+    if (action === 'list') {
+      const all = ledger.list();
+      if (all.length === 0) {
+        console.log('No mandates. Create one: viclaw mandates create --help');
+        return;
+      }
+      for (const m of all) {
+        console.log(`${m.revoked ? '○ revoked' : '● active'} ${m.id}  ${m.amountRange.currency} ${m.amountRange.minMinor}-${m.amountRange.maxMinor}, cap ${m.dailyCapMinor}/day, spent today ${ledger.dailySpent(m.id)}`);
+        console.log(`  payees: ${m.payeeAllowlist.map((p) => p.id).join(', ')}  expires: ${new Date(m.expiresAt).toISOString()}  by: ${m.humanApprovedBy}`);
+      }
+      return;
+    }
+
+    if (action === 'revoke') {
+      if (!opts.id) {
+        console.error('Error: revoke needs --id');
+        process.exitCode = 1;
+        return;
+      }
+      console.log(ledger.revoke(opts.id) ? `Revoked ${opts.id}` : `No such active mandate: ${opts.id}`);
+      return;
+    }
+
+    console.error(`Unknown mandates action: ${action} (create|list|revoke)`);
+    process.exitCode = 1;
   });
 
 program.parse();

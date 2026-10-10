@@ -171,6 +171,17 @@ A leg that is down, capped, or unconfigured fails fast and the next leg answers.
 - **Scheduler** — `at` / `every` / `cron` jobs, persistent store, run ledger, exponential-backoff retries, per-run timeouts, overdue-skip on restart
 - **Mandate ledger** — human-approved spending mandates (amount range, payee allowlist, daily cap, expiry); idempotent authorization with hash-bound receipts
 
+```bash
+# Unattended runs (jobs survive restarts; daemon ticks every 5s)
+viclaw schedule add --name "nightly" --prompt "run npm test and report" --cron "0 2 * * *"
+viclaw schedule list && viclaw schedule log --limit 5
+viclaw schedule daemon   # stays alive, fires jobs, records every run
+
+# Spending envelopes (the model only ever gets approve/deny)
+viclaw mandates create --payee "exa:Exa" --max 500 --daily 800 --currency USD --expires-in 24h --approved-by you
+viclaw mandates list && viclaw mandates revoke --id <id>
+```
+
 ### Channels
 - **CLI** — interactive readline with 24 slash commands
 - **TUI** — React/Ink terminal UI with streaming output

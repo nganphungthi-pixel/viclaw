@@ -3,6 +3,16 @@
 All notable changes to Viclaw, newest first. Format follows Keep a Changelog;
 versions follow semver.
 
+## [Unreleased] — 2026-10-10 (wiring round)
+
+### Added
+
+- CLI wiring for autonomy: `viclaw schedule add|list|log|run|remove|daemon`
+  and `viclaw mandates create|list|revoke`, backed by the platform data dir.
+  Verified live (no mocks): add/list/validation-errors/log/run-records-error/
+  remove/revoke round-trips, plus a real daemon firing 2 unattended runs with
+  ledger entries. Test residue removed afterwards.
+
 ## [Unreleased] — 2026-10-10 (npm verification round)
 
 ### Fixed
