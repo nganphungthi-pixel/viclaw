@@ -808,7 +808,9 @@ export class OllamaProvider implements Provider {
   private timeout: number;
 
   constructor(config: ProviderConfig = {}) {
-    this.model = config.model || "llama3";
+    // Coding-agent default, not a generic chat model: qwen3-coder:8b fits an
+    // 8GB GPU and matches the free-stack default (getFreeStackConfigs).
+    this.model = config.model || process.env.OLLAMA_MODEL || "qwen3-coder:8b";
     this.baseUrl = config.baseUrl || process.env.OLLAMA_HOST || "http://localhost:11434";
     this.timeout = config.timeout || 120000;
   }
