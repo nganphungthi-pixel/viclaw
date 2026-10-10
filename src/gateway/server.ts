@@ -129,6 +129,14 @@ export class GatewayServer {
   }
 
   private handleHTTP(req: IncomingMessage, res: ServerResponse): void {
+    // Liveness probe for Docker HEALTHCHECK and orchestrators. Answered
+    // before the Web UI gate so health checks work with serveWebUI off too.
+    if (req.url === '/health' || req.url === '/healthz') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', sessions: this.sessions.size }));
+      return;
+    }
+
     if (!this.config.serveWebUI || !this.config.publicDir) {
       res.writeHead(404); res.end('Not Found');
       return;

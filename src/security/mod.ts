@@ -133,6 +133,9 @@ export class SecurityScanner {
       { regex: /query\s*\(\s*["'`].*\$\{/, title: "SQL Injection via string interpolation", cwe: "CWE-89" },
       { regex: /execute\s*\(\s*["'].*%s/, title: "SQL Injection via string formatting", cwe: "CWE-89" },
       { regex: /f["']SELECT.*\{/, title: "SQL Injection via f-string", cwe: "CWE-89" },
+      // Classic concatenation: query("SELECT ... " + userId). The keyword
+      // anchor keeps plain string + string joins (e.g. log lines) out.
+      { regex: /(query|execute)\s*\(\s*["'`](SELECT|INSERT|UPDATE|DELETE)\b[^"'`]*["'`]\s*\+/, title: "SQL Injection via string concatenation", cwe: "CWE-89" },
     ];
 
     for (const { regex, title, cwe } of patterns) {
@@ -197,7 +200,11 @@ export class SecurityScanner {
     for (const { regex, title, cwe } of patterns) {
       const lines = content.split("\n");
       lines.forEach((line, idx) => {
-        if (regex.test(line) && line.includes("${") || line.includes("+") || line.includes("' +")) {
+        // Parentheses are load-bearing here: without them, && binds tighter
+        // than || and EVERY line containing "+" is flagged critical (observed:
+        // 320 false positives on our own codebase). Only flag when the
+        // dangerous sink pattern matched AND string building is present.
+        if (regex.test(line) && (line.includes("${") || line.includes("+") || line.includes("' +"))) {
           this.vulns.push({
             id: crypto.randomUUID(),
             severity: "critical",
